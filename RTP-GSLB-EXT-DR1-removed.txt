@@ -1,0 +1,33 @@
+set appflow param -templateRefresh 3600 -httpUrl ENABLED -httpCookie ENABLED -httpReferer ENABLED -httpMethod ENABLED -httpHost ENABLED -httpUserAgent ENABLED -httpContentType ENABLED -httpXForwardedFor ENABLED -observationDomainName Default -metrics ENABLED -events ENABLED -observationPointId 484445194 -logstreamOverNSIP ENABLED
+add appflow action af_action_rtp-gslbint-GCLDAP.aceins_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_rtp-gslbint-LDAP.aceins_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_rtp-gslbint-SLDAP.aceins_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_rtp-gslbint-GCLDAP.acepartner_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_rtp-gslbint-LDAP.acepartner_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_rtp-gslbint-SLDAP.acepartner_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_rtp-gslb_cb_gcldap_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_rtp-gslb_cb_ldap_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_rtp-gslb_cb_sldap_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_rtp-pingfed.acegroup_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow policy af_policy_rtp-gslbint-GCLDAP.aceins_vsvr_10.15.64.206 true af_action_rtp-gslbint-GCLDAP.aceins_vsvr_10.15.64.206
+add appflow policy af_policy_rtp-gslbint-LDAP.aceins_vsvr_10.15.64.206 true af_action_rtp-gslbint-LDAP.aceins_vsvr_10.15.64.206
+add appflow policy af_policy_rtp-gslbint-SLDAP.aceins_vsvr_10.15.64.206 true af_action_rtp-gslbint-SLDAP.aceins_vsvr_10.15.64.206
+add appflow policy af_policy_rtp-gslbint-GCLDAP.acepartner_vsvr_10.15.64.206 true af_action_rtp-gslbint-GCLDAP.acepartner_vsvr_10.15.64.206
+add appflow policy af_policy_rtp-gslbint-LDAP.acepartner_vsvr_10.15.64.206 true af_action_rtp-gslbint-LDAP.acepartner_vsvr_10.15.64.206
+add appflow policy af_policy_rtp-gslbint-SLDAP.acepartner_vsvr_10.15.64.206 true af_action_rtp-gslbint-SLDAP.acepartner_vsvr_10.15.64.206
+add appflow policy af_policy_rtp-gslb_cb_gcldap_vsvr_10.15.64.206 true af_action_rtp-gslb_cb_gcldap_vsvr_10.15.64.206
+add appflow policy af_policy_rtp-gslb_cb_ldap_vsvr_10.15.64.206 true af_action_rtp-gslb_cb_ldap_vsvr_10.15.64.206
+add appflow policy af_policy_rtp-gslb_cb_sldap_vsvr_10.15.64.206 true af_action_rtp-gslb_cb_sldap_vsvr_10.15.64.206
+add appflow policy af_policy_rtp-pingfed.acegroup_vsvr_10.15.64.206 true af_action_rtp-pingfed.acegroup_vsvr_10.15.64.206
+
+bind lb vserver rtp-gslbint-LDAP.aceins_vsvr -policyName af_policy_rtp-gslbint-LDAP.aceins_vsvr_10.15.64.206 -priority 255
+bind lb vserver rtp-gslbint-SLDAP.aceins_vsvr -policyName af_policy_rtp-gslbint-SLDAP.aceins_vsvr_10.15.64.206 -priority 255
+bind lb vserver rtp-gslbint-GCLDAP.aceins_vsvr -policyName af_policy_rtp-gslbint-GCLDAP.aceins_vsvr_10.15.64.206 -priority 255
+bind lb vserver rtp-gslbint-LDAP.acepartner_vsvr -policyName af_policy_rtp-gslbint-LDAP.acepartner_vsvr_10.15.64.206 -priority 255
+bind lb vserver rtp-gslbint-GCLDAP.acepartner_vsvr -policyName af_policy_rtp-gslbint-GCLDAP.acepartner_vsvr_10.15.64.206 -priority 255
+bind lb vserver rtp-gslbint-SLDAP.acepartner_vsvr -policyName af_policy_rtp-gslbint-SLDAP.acepartner_vsvr_10.15.64.206 -priority 255
+bind lb vserver rtp-gslb_cb_ldap_vsvr -policyName af_policy_rtp-gslb_cb_ldap_vsvr_10.15.64.206 -priority 255
+bind lb vserver rtp-gslb_cb_sldap_vsvr -policyName af_policy_rtp-gslb_cb_sldap_vsvr_10.15.64.206 -priority 255
+bind lb vserver rtp-gslb_cb_gcldap_vsvr -policyName af_policy_rtp-gslb_cb_gcldap_vsvr_10.15.64.206 -priority 255
+bind lb vserver rtp-pingfed.acegroup_vsvr -policyName af_policy_rtp-pingfed.acegroup_vsvr_10.15.64.206 -priority 255
+

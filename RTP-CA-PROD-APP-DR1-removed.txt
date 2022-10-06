@@ -1,0 +1,61 @@
+add appflow collector af_collector_10.15.64.206 -IPAddress 10.15.64.206 -port 4739
+add appflow collector af_collector_logstream_10.15.64.206 -IPAddress 10.15.64.206 -port 5557 -Transport logstream
+
+add appflow action af_action_dpsvcext-ps:8010_3_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_dpsvcext:8010_3_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_virusscanp:1344_3_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_EXTPRG03:50002_2_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_dpsvcext-ps-01cell:8010_2_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_dpsvcext-01cell:8010_2_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_connect-01cell:443_2_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_connect-01cell:80_2_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_ts-01cell:443_2_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_ts-01cell:80_2_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_www-01cell:443_2_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_www-01cell:80_2_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_connect-ps-01cell:443_2_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_connect-ps-01cell:80_2_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_ts-ps-01cell:443_2_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_ts-ps-01cell:80_2_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_www-ps-01cell:443_2_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_www-ps-01cell:80_2_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_log_10.15.64.206_web_sec -collectors af_collector_logstream_10.15.64.206 -securityInsight ENABLED
+add appflow policy af_policy_dpsvcext-ps:8010_3_10.15.64.206 true af_action_dpsvcext-ps:8010_3_10.15.64.206
+add appflow policy af_policy_dpsvcext:8010_3_10.15.64.206 true af_action_dpsvcext:8010_3_10.15.64.206
+add appflow policy af_policy_virusscanp:1344_3_10.15.64.206 true af_action_virusscanp:1344_3_10.15.64.206
+add appflow policy af_policy_EXTPRG03:50002_2_10.15.64.206 true af_action_EXTPRG03:50002_2_10.15.64.206
+add appflow policy af_policy_dpsvcext-ps-01cell:8010_2_10.15.64.206 true af_action_dpsvcext-ps-01cell:8010_2_10.15.64.206
+add appflow policy af_policy_dpsvcext-01cell:8010_2_10.15.64.206 true af_action_dpsvcext-01cell:8010_2_10.15.64.206
+add appflow policy af_policy_connect-01cell:443_2_10.15.64.206 true af_action_connect-01cell:443_2_10.15.64.206
+add appflow policy af_policy_connect-01cell:80_2_10.15.64.206 true af_action_connect-01cell:80_2_10.15.64.206
+add appflow policy af_policy_ts-01cell:443_2_10.15.64.206 true af_action_ts-01cell:443_2_10.15.64.206
+add appflow policy af_policy_ts-01cell:80_2_10.15.64.206 true af_action_ts-01cell:80_2_10.15.64.206
+add appflow policy af_policy_www-01cell:443_2_10.15.64.206 true af_action_www-01cell:443_2_10.15.64.206
+add appflow policy af_policy_www-01cell:80_2_10.15.64.206 true af_action_www-01cell:80_2_10.15.64.206
+add appflow policy af_policy_connect-ps-01cell:443_2_10.15.64.206 true af_action_connect-ps-01cell:443_2_10.15.64.206
+add appflow policy af_policy_connect-ps-01cell:80_2_10.15.64.206 true af_action_connect-ps-01cell:80_2_10.15.64.206
+add appflow policy af_policy_ts-ps-01cell:443_2_10.15.64.206 true af_action_ts-ps-01cell:443_2_10.15.64.206
+add appflow policy af_policy_ts-ps-01cell:80_2_10.15.64.206 true af_action_ts-ps-01cell:80_2_10.15.64.206
+add appflow policy af_policy_www-ps-01cell:443_2_10.15.64.206 true af_action_www-ps-01cell:443_2_10.15.64.206
+add appflow policy af_policy_www-ps-01cell:80_2_10.15.64.206 true af_action_www-ps-01cell:80_2_10.15.64.206
+add appflow policy af_policy_act_log_web_sec_10.15.64.206 true af_action_log_10.15.64.206_web_sec
+
+bind lb vserver EXTPDNS:53_2 -policyName af_policy_act_log_web_sec_10.15.64.206 -priority 254
+bind lb vserver EXTPRG03:50002_2 -policyName af_policy_EXTPRG03:50002_2_10.15.64.206 -priority 255
+bind lb vserver connect-01cell:443_2 -policyName af_policy_connect-01cell:443_2_10.15.64.206 -priority 255
+bind lb vserver connect-01cell:80_2 -policyName af_policy_connect-01cell:80_2_10.15.64.206 -priority 255
+bind lb vserver connect-ps-01cell:443_2 -policyName af_policy_connect-ps-01cell:443_2_10.15.64.206 -priority 255
+bind lb vserver connect-ps-01cell:80_2 -policyName af_policy_connect-ps-01cell:80_2_10.15.64.206 -priority 255
+bind lb vserver dpsvcext-01cell:8010_2 -policyName af_policy_dpsvcext-01cell:8010_2_10.15.64.206 -priority 255
+bind lb vserver dpsvcext-ps-01cell:8010_2 -policyName af_policy_dpsvcext-ps-01cell:8010_2_10.15.64.206 -priority 255
+bind lb vserver dpsvcext-ps:8010_3 -policyName af_policy_dpsvcext-ps:8010_3_10.15.64.206 -priority 255
+bind lb vserver dpsvcext:8010_3 -policyName af_policy_dpsvcext:8010_3_10.15.64.206 -priority 255
+bind lb vserver ts-01cell:443_2 -policyName af_policy_ts-01cell:443_2_10.15.64.206 -priority 255
+bind lb vserver ts-01cell:80_2 -policyName af_policy_ts-01cell:80_2_10.15.64.206 -priority 255
+bind lb vserver ts-ps-01cell:443_2 -policyName af_policy_ts-ps-01cell:443_2_10.15.64.206 -priority 255
+bind lb vserver ts-ps-01cell:80_2 -policyName af_policy_ts-ps-01cell:80_2_10.15.64.206 -priority 255
+bind lb vserver virusscanp:1344_3 -policyName af_policy_virusscanp:1344_3_10.15.64.206 -priority 255
+bind lb vserver www-01cell:443_2 -policyName af_policy_www-01cell:443_2_10.15.64.206 -priority 255
+bind lb vserver www-01cell:80_2 -policyName af_policy_www-01cell:80_2_10.15.64.206 -priority 255
+bind lb vserver www-ps-01cell:443_2 -policyName af_policy_www-ps-01cell:443_2_10.15.64.206 -priority 255
+bind lb vserver www-ps-01cell:80_2 -policyName af_policy_www-ps-01cell:80_2_10.15.64.206 -priority 255

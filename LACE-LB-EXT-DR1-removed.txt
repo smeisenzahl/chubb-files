@@ -1,0 +1,612 @@
+add rewrite action insert_STS_header insert_http_header Strict-Transport-Security "\"max-age=157680000\""
+add rewrite action clientIP_insert_0 insert_http_header X-Forwarded-For client.ip.src
+add rewrite action replace_http_act replace_all "http.RES.BODY(3000)" "\"https://\"" -search "text(\"http://\")"
+add rewrite policy enforce_STS true insert_STS_header
+add rewrite policy pol_clientIP_insert_0 true clientIP_insert_0
+add rewrite policy replace_http_pol true replace_http_act
+
+
+bind lb vserver AcknowledgementEmail.acegroup.com_http_vsvr AcknowledgementEmail.acegroup.com_http_svc_grp
+bind lb vserver AcknowledgementEmail.acegroup.com_ssl_vsvr AcknowledgementEmail.acegroup.com_ssl_svc_grp
+bind lb vserver na.aceonline.com-vsvr ns-ssl-svc-grp
+bind lb vserver rpasyn-db-nacops:443_2 rpasyn-db-nacops:443_SSL
+
+add cs action sciciwc_cs_act -targetLBVserver sciciwc_vsvr
+add cs action sciciwcws_cs_act -targetLBVserver sciciwcws_vsvr
+add cs action sciagent_cs_act -targetLBVserver sciagent_vsvr
+add cs action sciapi_cs_act -targetLBVserver sciapi_vsvr
+add cs action sciinsured_cs_act -targetLBVserver sciinsured_vsvr
+add cs action sciutility_cs_act -targetLBVserver sciutility_vsvr
+add cs action 2016officespace.ace-ina_http_cs_pol -targetLBVserver 2016officespace.ace-ina_http_vsvr
+add cs action 2016officespace.ace-ina_cs_pol -targetLBVserver 2016officespace.ace-ina_vsvr
+add cs action cs_aceclips_aaa -targetVserver ctxaaa
+add cs policy sciciwc_cs_pol -rule "HTTP.REQ.HOSTNAME.CONTAINS(\"sciciwc\")" -action sciciwc_cs_act
+add cs policy sciciwcws_cs_pol -rule "HTTP.REQ.HOSTNAME.CONTAINS(\"sciciwcws\")" -action sciciwcws_cs_act
+add cs policy sciagent.chubb_POL -rule "HTTP.REQ.HOSTNAME.CONTAINS(\"sciagents\")" -action sciagent_cs_act
+add cs policy sciapi_POL -rule "HTTP.REQ.HOSTNAME.CONTAINS(\"sciapi.\")" -action sciapi_cs_act
+add cs policy sciinsured_POL -rule "HTTP.REQ.HOSTNAME.CONTAINS(\"sciinsured.\")" -action sciinsured_cs_act
+add cs policy sciutility_POL -rule "HTTP.REQ.HOSTNAME.CONTAINS(\"sciutility.\")" -action sciutility_cs_act
+add cs policy cs_aceclips_2fa_pol -rule "HTTP.REQ.HOSTNAME.CONTAINS(\"www.aceclips\")"
+add cs policy cs_aceclips_aaa_pol -rule "HTTP.REQ.URL.STARTSWITH(\"/nf/auth/\") ||(http.REQ.URL.EQ(\"/\").NOT && (is_vpn_url))" -action cs_aceclips_aaa
+add cs policy 2016officespace.ace-ina_http-POL -rule "HTTP.REQ.HOSTNAME.CONTAINS(\"officespace.ace-ina\")" -action 2016officespace.ace-ina_http_cs_pol
+add cs policy 2016officespace.ace-ina-POL -rule "HTTP.REQ.HOSTNAME.CONTAINS(\"officespace.ace-ina\")" -action 2016officespace.ace-ina_cs_pol
+add cs policy 2016officespace.ace_cica-ina-POL -rule "HTTP.REQ.URL.SET_TEXT_MODE(IGNORECASE).REGEX_MATCH(re\"s/eAgentCollateral\") || HTTP.REQ.URL.SET_TEXT_MODE(IGNORECASE).REGEX_MATCH(re\"s/Innov-Cov-Concepts\") || HTTP.REQ.URL.SET_TEXT_MODE(IGNORECASE).REGEX_MATCH(re\"s/MedRisk\") || HTTP.REQ.URL.SET_TEXT_MODE(IGNORECASE).REGEX_MATCH(re\"s/Healthy-Paws\") || HTTP.REQ.URL.SET_TEXT_MODE(IGNORECASE).REGEX_MATCH(re\"s/SCIConsolidation/\") || HTTP.REQ.URL.SET_TEXT_MODE(IGNORECASE).REGEX_MATCH(re\"/CSStarACE\")\n\n\n\n" -action 2016officespace.ace-ina_cs_pol
+add cs policy 2016officespace.ace_cica_sutherland-ina-POL -rule "HTTP.REQ.IS_VALID\n\n" -action 2016officespace.ace-ina_cs_pol
+add cs policy Acesutherland2 -rule "http.REQ.url.set_text_mode(ignorecase).CONTAINS(\"/s/ACESutherland\") || http.REQ.url.set_text_mode(ignorecase).CONTAINS(\"layouts\") || http.REQ.url.set_text_mode(ignorecase).CONTAINS(\"ScriptResource\") || http.REQ.url.set_text_mode(ignorecase).CONTAINS(\"WebResource\") "
+add cs policy 2016officespace.ace_emwpri-ina-POL -rule "HTTP.REQ.URL.SET_TEXT_MODE(IGNORECASE).REGEX_MATCH(re\"s/emwpri\")\n\n\n\n" -action 2016officespace.ace-ina_cs_pol
+add cs policy 2016officespace.ace_CICACanadai-ina-POL -rule "HTTP.REQ.URL.SET_TEXT_MODE(IGNORECASE).REGEX_MATCH(re\"s/CICACanada-Recruiting\") || HTTP.REQ.URL.SET_TEXT_MODE(IGNORECASE).REGEX_MATCH(re\"s/CICA-Can-Onbrd-Dev/\") || HTTP.REQ.URL.SET_TEXT_MODE(IGNORECASE).REGEX_MATCH(re\"s/CICA-Canada-Recruiting-FR/\") || HTTP.REQ.URL.SET_TEXT_MODE(IGNORECASE).REGEX_MATCH(re\"s/CICA-Canada-Recruiting-FR-Dev/\")\n\n\n\n" -action 2016officespace.ace-ina_cs_pol
+add cs policy 2016officespace.ace_2ndWave-POL -rule "HTTP.REQ.URL.SET_TEXT_MODE(IGNORECASE).REGEX_MATCH(re\"s/VFIS/\") || HTTP.REQ.URL.SET_TEXT_MODE(IGNORECASE).REGEX_MATCH(re\"s/ACETPAManual/\") || HTTP.REQ.URL.SET_TEXT_MODE(IGNORECASE).REGEX_MATCH(re\"s/DentalSelect/\") || HTTP.REQ.URL.SET_TEXT_MODE(IGNORECASE).REGEX_MATCH(re\"s/CBSI-Chubb\")\n\n\n\n" -action 2016officespace.ace-ina_cs_pol
+add cs policy 2016officespace.ace_pfp_pol -rule "HTTP.REQ.URL.SET_TEXT_MODE(IGNORECASE).REGEX_MATCH(re\"s/PFP-Chubb-Partnership/\") \n\n\n" -action 2016officespace.ace-ina_cs_pol
+add cs policy 2016officespace.ace_loss_grcs_pol -rule "HTTP.REQ.URL.SET_TEXT_MODE(IGNORECASE).REGEX_MATCH(re\"/LossPrevention\") || HTTP.REQ.URL.SET_TEXT_MODE(IGNORECASE).REGEX_MATCH(re\"/grcs\") \n\n\n" -action 2016officespace.ace-ina_cs_pol
+add cs policylabel AceSutherland_pol_lab SSL
+bind cs policylabel AceSutherland_pol_lab 2016officespace.ace_cica_sutherland-ina-POL 100
+bind lb vserver scift.chubb.com_vsvr -policyName enforce_STS -priority 100 -gotoPriorityExpression END -type RESPONSE
+bind lb vserver sciwc.chuub.com -policyName enforce_STS -priority 100 -gotoPriorityExpression END -type RESPONSE
+bind lb vserver sciciwc_vsvr -policyName enforce_STS -priority 100 -gotoPriorityExpression END -type RESPONSE
+bind lb vserver surety_ssl_vsvr -policyName enforce_STS -priority 100 -gotoPriorityExpression END -type RESPONSE
+bind lb vserver www.aceclips.com2_ssl_vsvr -policyName replace_http_pol -priority 100 -gotoPriorityExpression END -type RESPONSE
+bind lb vserver www.aceclips.com2_ssl_vsvr -policyName aceclips_tm_logout_pol -priority 90 -gotoPriorityExpression END -type REQUEST
+bind lb vserver www.aceclips.com2_ssl_vsvr -policyName aceclips_tm_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver crs.chubbworldview_http_redirect_vsvr -policyName http2https_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver www.chubbworldview.com_http_80_redirect_vsvr -policyName http2https_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver www.aceclips.com-http-redirect -policyName http2https_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver max.chubb.com-redir-vsvr -policyName http2https_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver mrt.chubb.com_ssl_vsvr -policyName mrt.chubb_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver AcknowledgementEmail.acegroup.com_http_vsvr -policyName http2https_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver www.aceonline.com_http_redirect_vsvr -policyName http2https_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver na.aceonline.com-vsvr -policyName CorpSolut.chubb_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver na.aceonline.com-redirect-vsvr -policyName CorpSolut.chubb_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver na.aceonline.com-redirect-vsvr -policyName http2https_pol -priority 110 -gotoPriorityExpression END -type REQUEST
+bind lb vserver alliancepartners.aceonline_redirect_vsvr -policyName http2https_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver mrt.chubb.com_http_vsvr -policyName http2https_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver policyinquiry.ace-ina.com-redir-svr -policyName http2https_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver aws.acegroup.ace-ina.com-redir-svr -policyName http2https_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver www.inamar.com-vsvr-redir -policyName http2https_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver www.inamar-orca.com-vserver-redir -policyName http2https_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver acerc.acegroup.com_http_vsvr -policyName http2https_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver riskadvant_80 -policyName http2https_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver riskadvant_443 -policyName block_path_riskadv -priority 10 -gotoPriorityExpression END -type REQUEST
+bind lb vserver myview.esis_http_vsvr -policyName http2https_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver surety_http_vsvr -policyName http2https_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver www.aceclips.com2_ssl_vsvr -policyName uatpoc_pdpages_redir_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver ft.westchester.com_ssl_443_vserver -policyName ft_westchester_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver videoupload.chubb_vsvr -policyName http2https_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver www.acetravelapp.com_ssl_443_vserver -policyName Chubb_travelapp-Direct-Pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver www.acetravelapp.com_http-redirect -policyName http2https_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver chubbcbs_http_redirect_vsrv -policyName http2https_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver www.aceonline2.com_http_redirect_vsvr -policyName http2https_pol -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver scift.chubb.com_vsvr -policyName af_policy_scift.chubb.com_vsvr_10.15.64.206 -priority 255
+bind lb vserver sciwc.chuub.com -policyName af_policy_sciwc.chuub.com_10.15.64.206 -priority 255
+bind lb vserver scispft_vsvr -policyName af_policy_scispft_vsvr_10.15.64.206 -priority 255
+bind lb vserver crs.chubbworldview_ssl_vsvr -policyName af_policy_rnt_act_web_sec_10.15.64.206_d60c46c8-a90b-3adf-2c6b-7debc8806eb9 -priority 254
+bind lb vserver crs.chubbworldview_ssl_vsvr -policyName af_policy_crs.chubbworldview_ssl_vsvr_10.15.64.206 -priority 255
+bind lb vserver www.chubbworldview.com_ssl_443_vsvr -policyName af_policy_www.chubbworldview.com_ssl_443_vsvr_10.15.64.206 -priority 255
+bind lb vserver www.chubbworldview.com_http_80_redirect_vsvr -policyName af_policy_www.chubbworldview.com_http_80_redirect_vsvr_10.15.64.206 -priority 255
+bind lb vserver max.chubb.com-vsvr -policyName af_policy_max.chubb.com-vsvr_10.15.64.206 -priority 255
+bind lb vserver mrt.chubb.com_ssl_vsvr -policyName af_policy_mrt.chubb.com_ssl_vsvr_10.15.64.206 -priority 255
+bind lb vserver acerc.acegroup.com_vsvr -policyName af_policy_acerc.acegroup.com_vsvr_10.15.64.206 -priority 255
+bind lb vserver AcknowledgementEmail.acegroup.com_ssl_vsvr -policyName af_policy_AcknowledgementEmail.acegroup.com_ssl_vsvr_10.15.64.206 -priority 255
+bind lb vserver www.aceonline.com_ssl_vsvr -policyName af_policy_www.aceonline.com_ssl_vsvr_10.15.64.206 -priority 255
+bind lb vserver alliancepartners.aceonline_vsvr -policyName af_policy_alliancepartners.aceonline_vsvr_10.15.64.206 -priority 255
+bind lb vserver policyinquiry.ace-ina.com-svr -policyName af_policy_policyinquiry.ace-ina.com-svr_10.15.64.206 -priority 255
+bind lb vserver aws.acegroup.ace-ina.com-svr -policyName af_policy_aws.acegroup.ace-ina.com-svr_10.15.64.206 -priority 255
+bind lb vserver surety_ssl_vsvr -policyName af_policy_surety_ssl_vsvr_10.15.64.206 -priority 255
+bind lb vserver www.inamar.com-vsvr -policyName af_policy_www.inamar.com-vsvr_10.15.64.206 -priority 255
+bind lb vserver www.inamar-orca.com-vserver -policyName af_policy_www.inamar-orca.com-vserver_10.15.64.206 -priority 255
+bind lb vserver acerc.acegroup.com_http_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 255
+bind lb vserver www.inamar-certs.com_ssl_443_vserver -policyName af_policy_rnt_act_web_sec_10.15.64.206_d60c46c8-a90b-3adf-2c6b-7debc8806eb9 -priority 254
+bind lb vserver www.inamar-certs.com_ssl_443_vserver -policyName af_policy_www.inamar-certs.com_ssl_443_vserver_10.15.64.206 -priority 255
+bind lb vserver riskadvant_443 -policyName af_policy_riskadvant_443_10.15.64.206 -priority 255
+bind lb vserver myview.esis_vsvr -policyName af_policy_myview.esis_vsvr_10.15.64.206 -priority 255
+bind lb vserver claimantservice.esis_vsvr -policyName af_policy_claimantservice.esis_vsvr_10.15.64.206 -priority 255
+bind lb vserver chubbcbs_ssl_443_vsrv -policyName af_policy_chubbcbs_ssl_443_vsrv -priority 100
+bind lb vserver www.aceonline2.com_ssl_vsvr -policyName af_policy_www.aceonline2.com_ssl_vsvr_10.15.64.206 -priority 255
+bind lb vserver scispft_vsvr -policyName Bypass_APPFW -priority 7 -gotoPriorityExpression END -type REQUEST
+bind lb vserver sciciwc_vsvr -policyName Bypass_APPFW -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver sciciwcws_vsvr -policyName Bypass_APPFW -priority 7 -gotoPriorityExpression END -type REQUEST
+bind lb vserver sciagent_vsvr -policyName Bypass_APPFW -priority 7 -gotoPriorityExpression END -type REQUEST
+bind lb vserver sciapi_vsvr -policyName Bypass_APPFW -priority 7 -gotoPriorityExpression END -type REQUEST
+bind lb vserver sciinsured_vsvr -policyName Bypass_APPFW -priority 7 -gotoPriorityExpression END -type REQUEST
+bind lb vserver sciutility_vsvr -policyName Bypass_APPFW -priority 7 -gotoPriorityExpression END -type REQUEST
+bind lb vserver www.aceclips.com_ssl_vsvr -policyName Bypass_APPFW -priority 25 -gotoPriorityExpression END -type REQUEST
+bind lb vserver www.inamar-certs.com_http_80_vserver -policyName Bypass_APPFW -priority 100 -gotoPriorityExpression END -type REQUEST
+bind lb vserver riskadvant_80 -policyName Bypass_APPFW -priority 25 -gotoPriorityExpression END -type REQUEST
+bind lb vserver riskadvant_443 -policyName Bypass_APPFW -priority 25 -gotoPriorityExpression END -type REQUEST
+bind lb vserver myview.esis_vsvr -policyName Bypass_APPFW -priority 25 -gotoPriorityExpression END -type REQUEST
+bind lb vserver ft.westchester.com_ssl_443_vserver -policyName Bypass_APPFW -priority 100 -gotoPriorityExpression END -type REQUEST
+
+bind cs vserver sciciwc_sciciwcws_vsvr -policyName sciciwcws_cs_pol -priority 100 -devno 22424
+bind cs vserver sciciwc_sciciwcws_vsvr -policyName sciciwc_cs_pol -priority 110 -devno 22424
+bind cs vserver sciciwc_sciciwcws_http_vsvr -policyName sciciwcws_cs_pol -priority 100 -devno 22427
+bind cs vserver sciciwc_sciciwcws_http_vsvr -policyName sciciwc_cs_pol -priority 110 -devno 22427
+bind cs vserver scifrontend.chubb_cs_vsvr -policyName Bypass_APPFW -priority 5 -gotoPriorityExpression END -type REQUEST -devno 22430
+bind cs vserver scifrontend.chubb_cs_vsvr -policyName sciagent.chubb_POL -priority 100 -devno 22432
+bind cs vserver scifrontend.chubb_cs_vsvr -policyName sciapi_POL -priority 110 -devno 22432
+bind cs vserver scifrontend.chubb_cs_vsvr -policyName sciinsured_POL -priority 120 -devno 22432
+bind cs vserver scifrontend.chubb_http_cs_vsvr -policyName Bypass_APPFW -priority 6 -gotoPriorityExpression END -type REQUEST -devno 22436
+bind cs vserver scifrontend.chubb_http_cs_vsvr -policyName sciagent.chubb_POL -priority 100 -devno 22438
+bind cs vserver scifrontend.chubb_http_cs_vsvr -policyName sciapi_POL -priority 110 -devno 22438
+bind cs vserver scifrontend.chubb_http_cs_vsvr -policyName sciinsured_POL -priority 120 -devno 22438
+bind cs vserver 2016Sharepoint_ssl_cs_vsvr -policyName 2016officespace.ace_cica-ina-POL -priority 100 -devno 23430
+bind cs vserver 2016Sharepoint_ssl_cs_vsvr -policyName Acesutherland2 -priority 110 -gotoPriorityExpression NEXT -invoke policylabel AceSutherland_pol_lab -devno 23430
+bind cs vserver 2016Sharepoint_ssl_cs_vsvr -policyName 2016officespace.ace_emwpri-ina-POL -priority 120 -devno 23430
+bind cs vserver 2016Sharepoint_ssl_cs_vsvr -policyName 2016officespace.ace_CICACanadai-ina-POL -priority 130 -devno 23430
+bind cs vserver 2016Sharepoint_ssl_cs_vsvr -policyName 2016officespace.ace_2ndWave-POL -priority 140 -devno 23430
+bind cs vserver 2016Sharepoint_ssl_cs_vsvr -policyName 2016officespace.ace_pfp_pol -priority 150 -devno 23430
+bind cs vserver 2016Sharepoint_ssl_cs_vsvr -policyName 2016officespace.ace_loss_grcs_pol -priority 160 -devno 23430
+bind cs vserver 2016Sharepoint_http_cs_vsvr -policyName 2016officespace.ace-ina_http-POL -priority 110 -devno 23438
+
+bind ssl vserver scift.chubb.com_vsvr -eccCurveName P_256
+bind ssl vserver scift.chubb.com_vsvr -eccCurveName P_384
+bind ssl vserver scift.chubb.com_vsvr -eccCurveName P_224
+bind ssl vserver scift.chubb.com_vsvr -eccCurveName P_521
+bind ssl vserver sciwc.chuub.com -eccCurveName P_256
+bind ssl vserver sciwc.chuub.com -eccCurveName P_384
+bind ssl vserver sciwc.chuub.com -eccCurveName P_224
+bind ssl vserver sciwc.chuub.com -eccCurveName P_521
+bind ssl vserver scispft_vsvr -eccCurveName P_256
+bind ssl vserver scispft_vsvr -eccCurveName P_384
+bind ssl vserver scispft_vsvr -eccCurveName P_224
+bind ssl vserver scispft_vsvr -eccCurveName P_521
+bind ssl vserver sciciwc_vsvr -eccCurveName P_256
+bind ssl vserver sciciwc_vsvr -eccCurveName P_384
+bind ssl vserver sciciwc_vsvr -eccCurveName P_224
+bind ssl vserver sciciwc_vsvr -eccCurveName P_521
+bind ssl vserver sciciwcws_vsvr -eccCurveName P_256
+bind ssl vserver sciciwcws_vsvr -eccCurveName P_384
+bind ssl vserver sciciwcws_vsvr -eccCurveName P_224
+bind ssl vserver sciciwcws_vsvr -eccCurveName P_521
+bind ssl vserver sciagent_vsvr -eccCurveName P_256
+bind ssl vserver sciagent_vsvr -eccCurveName P_384
+bind ssl vserver sciagent_vsvr -eccCurveName P_224
+bind ssl vserver sciagent_vsvr -eccCurveName P_521
+bind ssl vserver sciapi_vsvr -eccCurveName P_256
+bind ssl vserver sciapi_vsvr -eccCurveName P_384
+bind ssl vserver sciapi_vsvr -eccCurveName P_224
+bind ssl vserver sciapi_vsvr -eccCurveName P_521
+bind ssl vserver sciinsured_vsvr -eccCurveName P_256
+bind ssl vserver sciinsured_vsvr -eccCurveName P_384
+bind ssl vserver sciinsured_vsvr -eccCurveName P_224
+bind ssl vserver sciinsured_vsvr -eccCurveName P_521
+bind ssl vserver sciutility_vsvr -eccCurveName P_256
+bind ssl vserver sciutility_vsvr -eccCurveName P_384
+bind ssl vserver sciutility_vsvr -eccCurveName P_224
+bind ssl vserver sciutility_vsvr -eccCurveName P_521
+bind ssl vserver tumble2_ssl_vsvr -eccCurveName P_256
+bind ssl vserver tumble2_ssl_vsvr -eccCurveName P_384
+bind ssl vserver tumble2_ssl_vsvr -eccCurveName P_224
+bind ssl vserver tumble2_ssl_vsvr -eccCurveName P_521
+bind ssl vserver crs.chubbworldview_ssl_vsvr -eccCurveName P_256
+bind ssl vserver crs.chubbworldview_ssl_vsvr -eccCurveName P_384
+bind ssl vserver crs.chubbworldview_ssl_vsvr -eccCurveName P_224
+bind ssl vserver crs.chubbworldview_ssl_vsvr -eccCurveName P_521
+bind ssl vserver www.chubbworldview.com_ssl_443_vsvr -eccCurveName P_256
+bind ssl vserver www.chubbworldview.com_ssl_443_vsvr -eccCurveName P_384
+bind ssl vserver www.chubbworldview.com_ssl_443_vsvr -eccCurveName P_224
+bind ssl vserver www.chubbworldview.com_ssl_443_vsvr -eccCurveName P_521
+bind ssl vserver www.aceclips.com_ssl_vsvr -eccCurveName P_256
+bind ssl vserver www.aceclips.com_ssl_vsvr -eccCurveName P_384
+bind ssl vserver www.aceclips.com_ssl_vsvr -eccCurveName P_224
+bind ssl vserver www.aceclips.com_ssl_vsvr -eccCurveName P_521
+bind ssl vserver max.chubb.com-vsvr -eccCurveName P_256
+bind ssl vserver max.chubb.com-vsvr -eccCurveName P_384
+bind ssl vserver max.chubb.com-vsvr -eccCurveName P_224
+bind ssl vserver max.chubb.com-vsvr -eccCurveName P_521
+bind ssl vserver mrt.chubb.com_ssl_vsvr -eccCurveName P_256
+bind ssl vserver mrt.chubb.com_ssl_vsvr -eccCurveName P_384
+bind ssl vserver mrt.chubb.com_ssl_vsvr -eccCurveName P_224
+bind ssl vserver mrt.chubb.com_ssl_vsvr -eccCurveName P_521
+bind ssl vserver acerc.acegroup.com_vsvr -eccCurveName P_256
+bind ssl vserver acerc.acegroup.com_vsvr -eccCurveName P_384
+bind ssl vserver acerc.acegroup.com_vsvr -eccCurveName P_224
+bind ssl vserver acerc.acegroup.com_vsvr -eccCurveName P_521
+bind ssl vserver AcknowledgementEmail.acegroup.com_ssl_vsvr -eccCurveName P_256
+bind ssl vserver AcknowledgementEmail.acegroup.com_ssl_vsvr -eccCurveName P_384
+bind ssl vserver AcknowledgementEmail.acegroup.com_ssl_vsvr -eccCurveName P_224
+bind ssl vserver AcknowledgementEmail.acegroup.com_ssl_vsvr -eccCurveName P_521
+bind ssl vserver www.aceonline.com_ssl_vsvr -eccCurveName P_256
+bind ssl vserver www.aceonline.com_ssl_vsvr -eccCurveName P_384
+bind ssl vserver www.aceonline.com_ssl_vsvr -eccCurveName P_224
+bind ssl vserver www.aceonline.com_ssl_vsvr -eccCurveName P_521
+bind ssl vserver na.aceonline.com-vsvr -eccCurveName P_256
+bind ssl vserver na.aceonline.com-vsvr -eccCurveName P_384
+bind ssl vserver na.aceonline.com-vsvr -eccCurveName P_224
+bind ssl vserver na.aceonline.com-vsvr -eccCurveName P_521
+bind ssl vserver alliancepartners.aceonline_vsvr -eccCurveName P_256
+bind ssl vserver alliancepartners.aceonline_vsvr -eccCurveName P_384
+bind ssl vserver alliancepartners.aceonline_vsvr -eccCurveName P_224
+bind ssl vserver alliancepartners.aceonline_vsvr -eccCurveName P_521
+bind ssl vserver policyinquiry.ace-ina.com-svr -eccCurveName P_256
+bind ssl vserver policyinquiry.ace-ina.com-svr -eccCurveName P_384
+bind ssl vserver policyinquiry.ace-ina.com-svr -eccCurveName P_224
+bind ssl vserver policyinquiry.ace-ina.com-svr -eccCurveName P_521
+bind ssl vserver aws.acegroup.ace-ina.com-svr -eccCurveName P_256
+bind ssl vserver aws.acegroup.ace-ina.com-svr -eccCurveName P_384
+bind ssl vserver aws.acegroup.ace-ina.com-svr -eccCurveName P_224
+bind ssl vserver aws.acegroup.ace-ina.com-svr -eccCurveName P_521
+bind ssl vserver surety_ssl_vsvr -eccCurveName P_256
+bind ssl vserver surety_ssl_vsvr -eccCurveName P_384
+bind ssl vserver surety_ssl_vsvr -eccCurveName P_224
+bind ssl vserver surety_ssl_vsvr -eccCurveName P_521
+bind ssl vserver www.inamar.com-vsvr -eccCurveName P_256
+bind ssl vserver www.inamar.com-vsvr -eccCurveName P_384
+bind ssl vserver www.inamar.com-vsvr -eccCurveName P_224
+bind ssl vserver www.inamar.com-vsvr -eccCurveName P_521
+bind ssl vserver www.inamar-orca.com-vserver -eccCurveName P_256
+bind ssl vserver www.inamar-orca.com-vserver -eccCurveName P_384
+bind ssl vserver www.inamar-orca.com-vserver -eccCurveName P_224
+bind ssl vserver www.inamar-orca.com-vserver -eccCurveName P_521
+bind ssl vserver www.inamar-certs.com_ssl_443_vserver -eccCurveName P_256
+bind ssl vserver www.inamar-certs.com_ssl_443_vserver -eccCurveName P_384
+bind ssl vserver www.inamar-certs.com_ssl_443_vserver -eccCurveName P_224
+bind ssl vserver www.inamar-certs.com_ssl_443_vserver -eccCurveName P_521
+bind ssl vserver riskadvant_443 -eccCurveName P_256
+bind ssl vserver riskadvant_443 -eccCurveName P_384
+bind ssl vserver riskadvant_443 -eccCurveName P_224
+bind ssl vserver riskadvant_443 -eccCurveName P_521
+bind ssl vserver myview.esis_vsvr -eccCurveName P_256
+bind ssl vserver myview.esis_vsvr -eccCurveName P_384
+bind ssl vserver myview.esis_vsvr -eccCurveName P_224
+bind ssl vserver myview.esis_vsvr -eccCurveName P_521
+bind ssl vserver claimantservice.esis_vsvr -eccCurveName P_256
+bind ssl vserver claimantservice.esis_vsvr -eccCurveName P_384
+bind ssl vserver claimantservice.esis_vsvr -eccCurveName P_224
+bind ssl vserver claimantservice.esis_vsvr -eccCurveName P_521
+bind ssl vserver erisk.esis_vsvr -eccCurveName P_256
+bind ssl vserver erisk.esis_vsvr -eccCurveName P_384
+bind ssl vserver erisk.esis_vsvr -eccCurveName P_224
+bind ssl vserver erisk.esis_vsvr -eccCurveName P_521
+bind ssl vserver sciciwc_sciciwcws_vsvr -eccCurveName P_256
+bind ssl vserver sciciwc_sciciwcws_vsvr -eccCurveName P_384
+bind ssl vserver sciciwc_sciciwcws_vsvr -eccCurveName P_224
+bind ssl vserver sciciwc_sciciwcws_vsvr -eccCurveName P_521
+bind ssl vserver scifrontend.chubb_cs_vsvr -eccCurveName P_256
+bind ssl vserver scifrontend.chubb_cs_vsvr -eccCurveName P_384
+bind ssl vserver scifrontend.chubb_cs_vsvr -eccCurveName P_224
+bind ssl vserver scifrontend.chubb_cs_vsvr -eccCurveName P_521
+bind ssl vserver www.aceclips.com2_ssl_vsvr -eccCurveName P_256
+bind ssl vserver www.aceclips.com2_ssl_vsvr -eccCurveName P_384
+bind ssl vserver www.aceclips.com2_ssl_vsvr -eccCurveName P_224
+bind ssl vserver www.aceclips.com2_ssl_vsvr -eccCurveName P_521
+bind ssl vserver ft.westchester.com_ssl_443_vserver -eccCurveName P_256
+bind ssl vserver ft.westchester.com_ssl_443_vserver -eccCurveName P_384
+bind ssl vserver ft.westchester.com_ssl_443_vserver -eccCurveName P_224
+bind ssl vserver ft.westchester.com_ssl_443_vserver -eccCurveName P_521
+bind ssl vserver aws1.acegroup.com-ssl-443 -eccCurveName P_256
+bind ssl vserver aws1.acegroup.com-ssl-443 -eccCurveName P_384
+bind ssl vserver aws1.acegroup.com-ssl-443 -eccCurveName P_224
+bind ssl vserver aws1.acegroup.com-ssl-443 -eccCurveName P_521
+bind ssl vserver isamurp01-VIP-combinedinsurance.com-SSL -eccCurveName P_256
+bind ssl vserver isamurp01-VIP-combinedinsurance.com-SSL -eccCurveName P_384
+bind ssl vserver isamurp01-VIP-combinedinsurance.com-SSL -eccCurveName P_224
+bind ssl vserver isamurp01-VIP-combinedinsurance.com-SSL -eccCurveName P_521
+bind ssl vserver isamurp02-VIP-combinedinsurance.com-SSL -eccCurveName P_256
+bind ssl vserver isamurp02-VIP-combinedinsurance.com-SSL -eccCurveName P_384
+bind ssl vserver isamurp02-VIP-combinedinsurance.com-SSL -eccCurveName P_224
+bind ssl vserver isamurp02-VIP-combinedinsurance.com-SSL -eccCurveName P_521
+bind ssl vserver agvapps01.acegroup.com_ssl_443_vserver -eccCurveName P_256
+bind ssl vserver agvapps01.acegroup.com_ssl_443_vserver -eccCurveName P_384
+bind ssl vserver agvapps01.acegroup.com_ssl_443_vserver -eccCurveName P_224
+bind ssl vserver agvapps01.acegroup.com_ssl_443_vserver -eccCurveName P_521
+bind ssl vserver portal.aceagen.com_ssl_443_vserver -eccCurveName P_256
+bind ssl vserver portal.aceagen.com_ssl_443_vserver -eccCurveName P_384
+bind ssl vserver portal.aceagen.com_ssl_443_vserver -eccCurveName P_224
+bind ssl vserver portal.aceagen.com_ssl_443_vserver -eccCurveName P_521
+bind ssl vserver videoupload.chubb_ssl_vsvr -eccCurveName P_256
+bind ssl vserver videoupload.chubb_ssl_vsvr -eccCurveName P_384
+bind ssl vserver videoupload.chubb_ssl_vsvr -eccCurveName P_224
+bind ssl vserver videoupload.chubb_ssl_vsvr -eccCurveName P_521
+bind ssl vserver www.acetravelapp.com_ssl_443_vserver -eccCurveName P_256
+bind ssl vserver www.acetravelapp.com_ssl_443_vserver -eccCurveName P_384
+bind ssl vserver www.acetravelapp.com_ssl_443_vserver -eccCurveName P_224
+bind ssl vserver www.acetravelapp.com_ssl_443_vserver -eccCurveName P_521
+bind ssl vserver 2016officespace.ace-ina_vsvr -eccCurveName P_256
+bind ssl vserver 2016officespace.ace-ina_vsvr -eccCurveName P_384
+bind ssl vserver 2016officespace.ace-ina_vsvr -eccCurveName P_224
+bind ssl vserver 2016officespace.ace-ina_vsvr -eccCurveName P_521
+bind ssl vserver chubbcbs_ssl_443_vsrv -eccCurveName P_256
+bind ssl vserver chubbcbs_ssl_443_vsrv -eccCurveName P_384
+bind ssl vserver chubbcbs_ssl_443_vsrv -eccCurveName P_224
+bind ssl vserver chubbcbs_ssl_443_vsrv -eccCurveName P_521
+bind ssl vserver kytax_ssl_443_vsvr -eccCurveName P_256
+bind ssl vserver kytax_ssl_443_vsvr -eccCurveName P_384
+bind ssl vserver kytax_ssl_443_vsvr -eccCurveName P_224
+bind ssl vserver kytax_ssl_443_vsvr -eccCurveName P_521
+bind ssl vserver www.aceonline2.com_ssl_vsvr -eccCurveName P_256
+bind ssl vserver www.aceonline2.com_ssl_vsvr -eccCurveName P_384
+bind ssl vserver www.aceonline2.com_ssl_vsvr -eccCurveName P_224
+bind ssl vserver www.aceonline2.com_ssl_vsvr -eccCurveName P_521
+bind ssl vserver ctxaaa -eccCurveName P_256
+bind ssl vserver ctxaaa -eccCurveName P_384
+bind ssl vserver ctxaaa -eccCurveName P_224
+bind ssl vserver ctxaaa -eccCurveName P_521
+bind ssl vserver 2016Sharepoint_ssl_cs_vsvr -eccCurveName P_256
+bind ssl vserver 2016Sharepoint_ssl_cs_vsvr -eccCurveName P_384
+bind ssl vserver 2016Sharepoint_ssl_cs_vsvr -eccCurveName P_224
+bind ssl vserver 2016Sharepoint_ssl_cs_vsvr -eccCurveName P_521
+bind ssl serviceGroup www.aceonline2.com_ssl_svc_grp -eccCurveName P_256
+bind ssl serviceGroup www.aceonline2.com_ssl_svc_grp -eccCurveName P_384
+bind ssl serviceGroup www.aceonline2.com_ssl_svc_grp -eccCurveName P_224
+bind ssl serviceGroup www.aceonline2.com_ssl_svc_grp -eccCurveName P_521
+bind ssl serviceGroup kytax_ssl_443_svc_grp -eccCurveName P_256
+bind ssl serviceGroup kytax_ssl_443_svc_grp -eccCurveName P_384
+bind ssl serviceGroup kytax_ssl_443_svc_grp -eccCurveName P_224
+bind ssl serviceGroup kytax_ssl_443_svc_grp -eccCurveName P_521
+bind ssl serviceGroup policyinquiry_ssl_443_svc_grp -eccCurveName P_256
+bind ssl serviceGroup policyinquiry_ssl_443_svc_grp -eccCurveName P_384
+bind ssl serviceGroup policyinquiry_ssl_443_svc_grp -eccCurveName P_224
+bind ssl serviceGroup policyinquiry_ssl_443_svc_grp -eccCurveName P_521
+bind ssl serviceGroup chubbcbs_ssl_443_svc_grp -eccCurveName P_256
+bind ssl serviceGroup chubbcbs_ssl_443_svc_grp -eccCurveName P_384
+bind ssl serviceGroup chubbcbs_ssl_443_svc_grp -eccCurveName P_224
+bind ssl serviceGroup chubbcbs_ssl_443_svc_grp -eccCurveName P_521
+bind ssl serviceGroup 2016sharepointA_svc_grp -eccCurveName P_256
+bind ssl serviceGroup 2016sharepointA_svc_grp -eccCurveName P_384
+bind ssl serviceGroup 2016sharepointA_svc_grp -eccCurveName P_224
+bind ssl serviceGroup 2016sharepointA_svc_grp -eccCurveName P_521
+bind ssl serviceGroup Sentinet-443-svc -eccCurveName P_256
+bind ssl serviceGroup Sentinet-443-svc -eccCurveName P_384
+bind ssl serviceGroup Sentinet-443-svc -eccCurveName P_224
+bind ssl serviceGroup Sentinet-443-svc -eccCurveName P_521
+bind ssl serviceGroup ft.aceonline.com_ssl_443_svc_grp -eccCurveName P_256
+bind ssl serviceGroup ft.aceonline.com_ssl_443_svc_grp -eccCurveName P_384
+bind ssl serviceGroup ft.aceonline.com_ssl_443_svc_grp -eccCurveName P_224
+bind ssl serviceGroup ft.aceonline.com_ssl_443_svc_grp -eccCurveName P_521
+bind ssl serviceGroup ns-ssl-svc-grp -eccCurveName P_256
+bind ssl serviceGroup ns-ssl-svc-grp -eccCurveName P_384
+bind ssl serviceGroup ns-ssl-svc-grp -eccCurveName P_224
+bind ssl serviceGroup ns-ssl-svc-grp -eccCurveName P_521
+bind ssl serviceGroup acerc.acegroup_w2016_svc_grp -eccCurveName P_256
+bind ssl serviceGroup acerc.acegroup_w2016_svc_grp -eccCurveName P_384
+bind ssl serviceGroup acerc.acegroup_w2016_svc_grp -eccCurveName P_224
+bind ssl serviceGroup acerc.acegroup_w2016_svc_grp -eccCurveName P_521
+bind ssl serviceGroup claimantservice.esis_svc_grp -eccCurveName P_256
+bind ssl serviceGroup claimantservice.esis_svc_grp -eccCurveName P_384
+bind ssl serviceGroup claimantservice.esis_svc_grp -eccCurveName P_224
+bind ssl serviceGroup claimantservice.esis_svc_grp -eccCurveName P_521
+bind ssl serviceGroup myview.esis_srv_grp -eccCurveName P_256
+bind ssl serviceGroup myview.esis_srv_grp -eccCurveName P_384
+bind ssl serviceGroup myview.esis_srv_grp -eccCurveName P_224
+bind ssl serviceGroup myview.esis_srv_grp -eccCurveName P_521
+bind ssl serviceGroup riskadvant_443 -eccCurveName P_256
+bind ssl serviceGroup riskadvant_443 -eccCurveName P_384
+bind ssl serviceGroup riskadvant_443 -eccCurveName P_224
+bind ssl serviceGroup riskadvant_443 -eccCurveName P_521
+bind ssl serviceGroup inamar-cert-svc-grp -eccCurveName P_256
+bind ssl serviceGroup inamar-cert-svc-grp -eccCurveName P_384
+bind ssl serviceGroup inamar-cert-svc-grp -eccCurveName P_224
+bind ssl serviceGroup inamar-cert-svc-grp -eccCurveName P_521
+bind ssl serviceGroup multi_site_svc_grp -eccCurveName P_256
+bind ssl serviceGroup multi_site_svc_grp -eccCurveName P_384
+bind ssl serviceGroup multi_site_svc_grp -eccCurveName P_224
+bind ssl serviceGroup multi_site_svc_grp -eccCurveName P_521
+bind ssl serviceGroup inamar-orca -eccCurveName P_256
+bind ssl serviceGroup inamar-orca -eccCurveName P_384
+bind ssl serviceGroup inamar-orca -eccCurveName P_224
+bind ssl serviceGroup inamar-orca -eccCurveName P_521
+bind ssl serviceGroup inamar-svc-grp -eccCurveName P_256
+bind ssl serviceGroup inamar-svc-grp -eccCurveName P_384
+bind ssl serviceGroup inamar-svc-grp -eccCurveName P_224
+bind ssl serviceGroup inamar-svc-grp -eccCurveName P_521
+bind ssl serviceGroup surety_ssl_svc_grp -eccCurveName P_256
+bind ssl serviceGroup surety_ssl_svc_grp -eccCurveName P_384
+bind ssl serviceGroup surety_ssl_svc_grp -eccCurveName P_224
+bind ssl serviceGroup surety_ssl_svc_grp -eccCurveName P_521
+bind ssl serviceGroup alliancepartner_svc_grp -eccCurveName P_256
+bind ssl serviceGroup alliancepartner_svc_grp -eccCurveName P_384
+bind ssl serviceGroup alliancepartner_svc_grp -eccCurveName P_224
+bind ssl serviceGroup alliancepartner_svc_grp -eccCurveName P_521
+bind ssl serviceGroup www.aceonline.com_ssl_svc_grp -eccCurveName P_256
+bind ssl serviceGroup www.aceonline.com_ssl_svc_grp -eccCurveName P_384
+bind ssl serviceGroup www.aceonline.com_ssl_svc_grp -eccCurveName P_224
+bind ssl serviceGroup www.aceonline.com_ssl_svc_grp -eccCurveName P_521
+bind ssl serviceGroup AcknowledgementEmail.acegroup.com_ssl_svc_grp -eccCurveName P_256
+bind ssl serviceGroup AcknowledgementEmail.acegroup.com_ssl_svc_grp -eccCurveName P_384
+bind ssl serviceGroup AcknowledgementEmail.acegroup.com_ssl_svc_grp -eccCurveName P_224
+bind ssl serviceGroup AcknowledgementEmail.acegroup.com_ssl_svc_grp -eccCurveName P_521
+bind ssl serviceGroup acerc.acegroup_svc_grp -eccCurveName P_256
+bind ssl serviceGroup acerc.acegroup_svc_grp -eccCurveName P_384
+bind ssl serviceGroup acerc.acegroup_svc_grp -eccCurveName P_224
+bind ssl serviceGroup acerc.acegroup_svc_grp -eccCurveName P_521
+bind ssl serviceGroup mrt.chubb.com_ssl_svc_grp -eccCurveName P_256
+bind ssl serviceGroup mrt.chubb.com_ssl_svc_grp -eccCurveName P_384
+bind ssl serviceGroup mrt.chubb.com_ssl_svc_grp -eccCurveName P_224
+bind ssl serviceGroup mrt.chubb.com_ssl_svc_grp -eccCurveName P_521
+bind ssl serviceGroup max.chubb.com-svc-grp -eccCurveName P_256
+bind ssl serviceGroup max.chubb.com-svc-grp -eccCurveName P_384
+bind ssl serviceGroup max.chubb.com-svc-grp -eccCurveName P_224
+bind ssl serviceGroup max.chubb.com-svc-grp -eccCurveName P_521
+bind ssl serviceGroup aceclips-svc-grp -eccCurveName P_256
+bind ssl serviceGroup aceclips-svc-grp -eccCurveName P_384
+bind ssl serviceGroup aceclips-svc-grp -eccCurveName P_224
+bind ssl serviceGroup aceclips-svc-grp -eccCurveName P_521
+bind ssl serviceGroup www.chubbworldview.com_ssl_443_svc_grp -eccCurveName P_256
+bind ssl serviceGroup www.chubbworldview.com_ssl_443_svc_grp -eccCurveName P_384
+bind ssl serviceGroup www.chubbworldview.com_ssl_443_svc_grp -eccCurveName P_224
+bind ssl serviceGroup www.chubbworldview.com_ssl_443_svc_grp -eccCurveName P_521
+bind ssl serviceGroup crs.chubbworldview_svc_grp -eccCurveName P_256
+bind ssl serviceGroup crs.chubbworldview_svc_grp -eccCurveName P_384
+bind ssl serviceGroup crs.chubbworldview_svc_grp -eccCurveName P_224
+bind ssl serviceGroup crs.chubbworldview_svc_grp -eccCurveName P_521
+bind ssl serviceGroup tumble2_ssl_svc_grp -eccCurveName P_256
+bind ssl serviceGroup tumble2_ssl_svc_grp -eccCurveName P_384
+bind ssl serviceGroup tumble2_ssl_svc_grp -eccCurveName P_224
+bind ssl serviceGroup tumble2_ssl_svc_grp -eccCurveName P_521
+bind ssl serviceGroup sciutility_svc_grp -eccCurveName P_256
+bind ssl serviceGroup sciutility_svc_grp -eccCurveName P_384
+bind ssl serviceGroup sciutility_svc_grp -eccCurveName P_224
+bind ssl serviceGroup sciutility_svc_grp -eccCurveName P_521
+bind ssl serviceGroup sciinsured_svc_grp -eccCurveName P_256
+bind ssl serviceGroup sciinsured_svc_grp -eccCurveName P_384
+bind ssl serviceGroup sciinsured_svc_grp -eccCurveName P_224
+bind ssl serviceGroup sciinsured_svc_grp -eccCurveName P_521
+bind ssl serviceGroup sciapi_svc_grp -eccCurveName P_256
+bind ssl serviceGroup sciapi_svc_grp -eccCurveName P_384
+bind ssl serviceGroup sciapi_svc_grp -eccCurveName P_224
+bind ssl serviceGroup sciapi_svc_grp -eccCurveName P_521
+bind ssl serviceGroup sciagent_svc_grp -eccCurveName P_256
+bind ssl serviceGroup sciagent_svc_grp -eccCurveName P_384
+bind ssl serviceGroup sciagent_svc_grp -eccCurveName P_224
+bind ssl serviceGroup sciagent_svc_grp -eccCurveName P_521
+bind ssl serviceGroup sciciwcws_svc_grp -eccCurveName P_256
+bind ssl serviceGroup sciciwcws_svc_grp -eccCurveName P_384
+bind ssl serviceGroup sciciwcws_svc_grp -eccCurveName P_224
+bind ssl serviceGroup sciciwcws_svc_grp -eccCurveName P_521
+bind ssl serviceGroup sciciwc_svc_grp -eccCurveName P_256
+bind ssl serviceGroup sciciwc_svc_grp -eccCurveName P_384
+bind ssl serviceGroup sciciwc_svc_grp -eccCurveName P_224
+bind ssl serviceGroup sciciwc_svc_grp -eccCurveName P_521
+bind ssl serviceGroup scispft_svc_grp -eccCurveName P_256
+bind ssl serviceGroup scispft_svc_grp -eccCurveName P_384
+bind ssl serviceGroup scispft_svc_grp -eccCurveName P_224
+bind ssl serviceGroup scispft_svc_grp -eccCurveName P_521
+bind ssl serviceGroup sciwc.chubb_svc_grp -eccCurveName P_256
+bind ssl serviceGroup sciwc.chubb_svc_grp -eccCurveName P_384
+bind ssl serviceGroup sciwc.chubb_svc_grp -eccCurveName P_224
+bind ssl serviceGroup sciwc.chubb_svc_grp -eccCurveName P_521
+bind ssl serviceGroup scift.chubb.com_svc_grp -eccCurveName P_256
+bind ssl serviceGroup scift.chubb.com_svc_grp -eccCurveName P_384
+bind ssl serviceGroup scift.chubb.com_svc_grp -eccCurveName P_224
+bind ssl serviceGroup scift.chubb.com_svc_grp -eccCurveName P_521
+bind ssl service erik_ssl_443_svc -eccCurveName P_256
+bind ssl service erik_ssl_443_svc -eccCurveName P_384
+bind ssl service erik_ssl_443_svc -eccCurveName P_224
+bind ssl service erik_ssl_443_svc -eccCurveName P_521
+bind ssl service ussbyintv8035-acetravel -eccCurveName P_256
+bind ssl service ussbyintv8035-acetravel -eccCurveName P_384
+bind ssl service ussbyintv8035-acetravel -eccCurveName P_224
+bind ssl service ussbyintv8035-acetravel -eccCurveName P_521
+bind ssl service ussbyintv2079-protal-aceagen -eccCurveName P_256
+bind ssl service ussbyintv2079-protal-aceagen -eccCurveName P_384
+bind ssl service ussbyintv2079-protal-aceagen -eccCurveName P_224
+bind ssl service ussbyintv2079-protal-aceagen -eccCurveName P_521
+bind ssl service ussbyintv2079-agvapps01 -eccCurveName P_256
+bind ssl service ussbyintv2079-agvapps01 -eccCurveName P_384
+bind ssl service ussbyintv2079-agvapps01 -eccCurveName P_224
+bind ssl service ussbyintv2079-agvapps01 -eccCurveName P_521
+bind ssl service erisk.esis_svr -eccCurveName P_256
+bind ssl service erisk.esis_svr -eccCurveName P_384
+bind ssl service erisk.esis_svr -eccCurveName P_224
+bind ssl service erisk.esis_svr -eccCurveName P_521
+bind ssl service aws.acegroup-ssl-svc -eccCurveName P_256
+bind ssl service aws.acegroup-ssl-svc -eccCurveName P_384
+bind ssl service aws.acegroup-ssl-svc -eccCurveName P_224
+bind ssl service aws.acegroup-ssl-svc -eccCurveName P_521
+bind ssl service policyinquiry-ssl-svc -eccCurveName P_256
+bind ssl service policyinquiry-ssl-svc -eccCurveName P_384
+bind ssl service policyinquiry-ssl-svc -eccCurveName P_224
+bind ssl service policyinquiry-ssl-svc -eccCurveName P_521
+bind ssl service nshttps-10.12.20.164-443 -eccCurveName P_256
+bind ssl service nshttps-10.12.20.164-443 -eccCurveName P_384
+bind ssl service nshttps-10.12.20.164-443 -eccCurveName P_224
+bind ssl service nshttps-10.12.20.164-443 -eccCurveName P_521
+bind ssl service nsrpcs-10.12.20.164-3008 -eccCurveName P_256
+bind ssl service nsrpcs-10.12.20.164-3008 -eccCurveName P_384
+bind ssl service nsrpcs-10.12.20.164-3008 -eccCurveName P_224
+bind ssl service nsrpcs-10.12.20.164-3008 -eccCurveName P_521
+bind ssl service nshttps-10.12.23.5-443 -eccCurveName P_256
+bind ssl service nshttps-10.12.23.5-443 -eccCurveName P_384
+bind ssl service nshttps-10.12.23.5-443 -eccCurveName P_224
+bind ssl service nshttps-10.12.23.5-443 -eccCurveName P_521
+bind ssl service nsrpcs-10.12.23.5-3008 -eccCurveName P_256
+bind ssl service nsrpcs-10.12.23.5-3008 -eccCurveName P_384
+bind ssl service nsrpcs-10.12.23.5-3008 -eccCurveName P_224
+bind ssl service nsrpcs-10.12.23.5-3008 -eccCurveName P_521
+
+
+set appfw settings -CEFLogging ON
+add appflow action af_action_scift.chubb.com_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -clientSideMeasurements ENABLED -securityInsight ENABLED
+add appflow action af_action_scispft_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_sciwc.chuub.com_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_crs.chubbworldview_ssl_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -clientSideMeasurements ENABLED
+add appflow action af_action_www.chubbworldview.com_ssl_443_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -clientSideMeasurements ENABLED
+add appflow action af_action_www.chubbworldview.com_http_80_redirect_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -clientSideMeasurements ENABLED
+add appflow action af_action_www.aceclips.com_ssl_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -clientSideMeasurements ENABLED
+add appflow action af_action_max.chubb.com-vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -clientSideMeasurements ENABLED
+add appflow action af_action_mrt.chubb.com_ssl_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -clientSideMeasurements ENABLED
+add appflow action af_action_acerc.acegroup.com_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -clientSideMeasurements ENABLED
+add appflow action af_action_AcknowledgementEmail.acegroup.com_ssl_443_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -clientSideMeasurements ENABLED
+add appflow action af_action_AcknowledgementEmail.acegroup.com_ssl_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -clientSideMeasurements ENABLED
+add appflow action af_action_www.aceonline.com_ssl_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -clientSideMeasurements ENABLED
+add appflow action af_action_na.aceonline.com-redirect-vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -clientSideMeasurements ENABLED
+add appflow action af_action_na.aceonline.com-vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -clientSideMeasurements ENABLED
+add appflow action af_action_alliancepartners.aceonline_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -clientSideMeasurements ENABLED
+add appflow action af_action_policyinquiry.ace-ina.com-svr_10.15.64.206 -collectors af_collector_10.15.64.206 -clientSideMeasurements ENABLED
+add appflow action af_action_aws.acegroup.ace-ina.com-svr_10.15.64.206 -collectors af_collector_10.15.64.206 -clientSideMeasurements ENABLED
+add appflow action af_action_surety_ssl_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_www.inamar.com-vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -clientSideMeasurements ENABLED
+add appflow action af_action_www.inamar-orca.com-vserver_10.15.64.206 -collectors af_collector_10.15.64.206 -clientSideMeasurements ENABLED
+add appflow action af_action_www.inamar-certs.com_ssl_443_vserver_10.15.64.206 -collectors af_collector_10.15.64.206 -clientSideMeasurements ENABLED
+add appflow action af_action_riskadvant_443_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_myview.esis_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_claimantservice.esis_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_10.15.64.206_web_sec -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_chubbcbs_ssl_443_vsrv_1 -collectors af_collector_10.15.64.206 -clientSideMeasurements ENABLED -comment CHG20150040
+add appflow action af_action_www.aceonline2.com_ssl_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -clientSideMeasurements ENABLED
+add appflow policy af_policy_scift.chubb.com_vsvr_10.15.64.206 true af_action_scift.chubb.com_vsvr_10.15.64.206
+add appflow policy af_policy_scispft_vsvr_10.15.64.206 true af_action_scispft_vsvr_10.15.64.206
+add appflow policy af_policy_sciwc.chuub.com_10.15.64.206 true af_action_sciwc.chuub.com_10.15.64.206
+add appflow policy af_policy_crs.chubbworldview_ssl_vsvr_10.15.64.206 "HTTP.REQ.HOSTNAME.CONTAINS(\"*.com\")" af_action_crs.chubbworldview_ssl_vsvr_10.15.64.206
+add appflow policy af_policy_www.chubbworldview.com_ssl_443_vsvr_10.15.64.206 "HTTP.REQ.HOSTNAME.CONTAINS(\"*.com\")" af_action_www.chubbworldview.com_ssl_443_vsvr_10.15.64.206
+add appflow policy af_policy_www.chubbworldview.com_http_80_redirect_vsvr_10.15.64.206 "HTTP.REQ.HOSTNAME.CONTAINS(\"*.com\")" af_action_www.chubbworldview.com_http_80_redirect_vsvr_10.15.64.206
+add appflow policy af_policy_max.chubb.com-vsvr_10.15.64.206 "HTTP.REQ.HOSTNAME.CONTAINS(\"*.com\")" af_action_max.chubb.com-vsvr_10.15.64.206
+add appflow policy af_policy_mrt.chubb.com_ssl_vsvr_10.15.64.206 "HTTP.REQ.HOSTNAME.CONTAINS(\"*.com\")" af_action_mrt.chubb.com_ssl_vsvr_10.15.64.206
+add appflow policy af_policy_acerc.acegroup.com_vsvr_10.15.64.206 "HTTP.REQ.HOSTNAME.CONTAINS(\"*.com\")" af_action_acerc.acegroup.com_vsvr_10.15.64.206
+add appflow policy af_policy_AcknowledgementEmail.acegroup.com_ssl_vsvr_10.15.64.206 "HTTP.REQ.HOSTNAME.CONTAINS(\"*.com\")" af_action_AcknowledgementEmail.acegroup.com_ssl_vsvr_10.15.64.206
+add appflow policy af_policy_www.aceonline.com_ssl_vsvr_10.15.64.206 "HTTP.REQ.HOSTNAME.CONTAINS(\"*.com\")" af_action_www.aceonline.com_ssl_vsvr_10.15.64.206
+add appflow policy af_policy_na.aceonline.com-redirect-vsvr_10.15.64.206 "HTTP.REQ.HOSTNAME.CONTAINS(\"*.com\")" af_action_na.aceonline.com-redirect-vsvr_10.15.64.206
+add appflow policy af_policy_na.aceonline.com-vsvr_10.15.64.206 "HTTP.REQ.HOSTNAME.CONTAINS(\"*.com\")" af_action_na.aceonline.com-vsvr_10.15.64.206
+add appflow policy af_policy_alliancepartners.aceonline_vsvr_10.15.64.206 "HTTP.REQ.HOSTNAME.CONTAINS(\"*.com\")" af_action_alliancepartners.aceonline_vsvr_10.15.64.206
+add appflow policy af_policy_policyinquiry.ace-ina.com-svr_10.15.64.206 "HTTP.REQ.HOSTNAME.CONTAINS(\"*.com\")" af_action_policyinquiry.ace-ina.com-svr_10.15.64.206
+add appflow policy af_policy_aws.acegroup.ace-ina.com-svr_10.15.64.206 "HTTP.REQ.HOSTNAME.CONTAINS(\"*.com\")" af_action_aws.acegroup.ace-ina.com-svr_10.15.64.206
+add appflow policy af_policy_surety_ssl_vsvr_10.15.64.206 true af_action_surety_ssl_vsvr_10.15.64.206
+add appflow policy af_policy_www.inamar.com-vsvr_10.15.64.206 "HTTP.REQ.HOSTNAME.CONTAINS(\"*.com\")" af_action_www.inamar.com-vsvr_10.15.64.206
+add appflow policy af_policy_www.inamar-orca.com-vserver_10.15.64.206 "HTTP.REQ.HOSTNAME.CONTAINS(\"*.com\")" af_action_www.inamar-orca.com-vserver_10.15.64.206
+add appflow policy af_policy_www.inamar-certs.com_ssl_443_vserver_10.15.64.206 "HTTP.REQ.HOSTNAME.CONTAINS(\"*.com\")" af_action_www.inamar-certs.com_ssl_443_vserver_10.15.64.206
+add appflow policy af_policy_riskadvant_443_10.15.64.206 true af_action_riskadvant_443_10.15.64.206
+add appflow policy af_policy_myview.esis_vsvr_10.15.64.206 true af_action_myview.esis_vsvr_10.15.64.206
+add appflow policy af_policy_claimantservice.esis_vsvr_10.15.64.206 true af_action_claimantservice.esis_vsvr_10.15.64.206
+add appflow policy af_policy_act_web_sec_10.15.64.206 true af_action_10.15.64.206_web_sec
+add appflow policy af_policy_rnt_act_web_sec_10.15.64.206_d60c46c8-a90b-3adf-2c6b-7debc8806eb9 "HTTP.REQ.HOSTNAME.CONTAINS(\"*.com\")" af_action_10.15.64.206_web_sec
+add appflow policy af_policy_chubbcbs_ssl_443_vsrv "HTTP.REQ.HOSTNAME.CONTAINS(\"*.com\")" af_action_chubbcbs_ssl_443_vsrv_1 -comment CHG20150040
+add appflow policy af_policy_www.aceonline2.com_ssl_vsvr_10.15.64.206 "HTTP.REQ.HOSTNAME.CONTAINS(\"*.com\")" af_action_www.aceonline2.com_ssl_vsvr_10.15.64.206
+
+
+removed below "set bot settings -proxyPort 0"
+add cache contentGroup DEFAULT
+add cache contentGroup BASEFILE -relExpiry 86000 -weakNegRelExpiry 600 -maxResSize 256 -memLimit 2
+add cache contentGroup DELTAJS -relExpiry 86000 -weakNegRelExpiry 600 -insertAge NO -maxResSize 256 -memLimit 1 -pinned YES
+add cache contentGroup ctx_cg_poc -relExpiry 86000 -weakNegRelExpiry 600 -insertAge NO -maxResSize 500 -memLimit 256 -pinned YES
+set cache contentGroup NSFEO -maxResSize 1994752
+add cache policy _nonGetReq -rule "!HTTP.REQ.METHOD.eq(GET)" -action NOCACHE
+add cache policy _advancedConditionalReq -rule "HTTP.REQ.HEADER(\"If-Match\").EXISTS || HTTP.REQ.HEADER(\"If-Unmodified-Since\").EXISTS" -action NOCACHE
+add cache policy _personalizedReq -rule "HTTP.REQ.HEADER(\"Cookie\").EXISTS || HTTP.REQ.HEADER(\"Authorization\").EXISTS || HTTP.REQ.HEADER(\"Proxy-Authorization\").EXISTS || HTTP.REQ.IS_NTLM_OR_NEGOTIATE" -action MAY_NOCACHE
+add cache policy _uncacheableStatusRes -rule "! ((HTTP.RES.STATUS.EQ(200)) || (HTTP.RES.STATUS.EQ(304)) || (HTTP.RES.STATUS.BETWEEN(400,499)) || (HTTP.RES.STATUS.BETWEEN(300, 302)) || (HTTP.RES.STATUS.EQ(307))|| (HTTP.RES.STATUS.EQ(203)))" -action NOCACHE
+add cache policy _uncacheableCacheControlRes -rule "((HTTP.RES.CACHE_CONTROL.IS_PRIVATE) || (HTTP.RES.CACHE_CONTROL.IS_NO_CACHE) || (HTTP.RES.CACHE_CONTROL.IS_NO_STORE) || (HTTP.RES.CACHE_CONTROL.IS_INVALID))" -action NOCACHE
+add cache policy _cacheableCacheControlRes -rule "((HTTP.RES.CACHE_CONTROL.IS_PUBLIC) || (HTTP.RES.CACHE_CONTROL.IS_MAX_AGE) || (HTTP.RES.CACHE_CONTROL.IS_MUST_REVALIDATE) || (HTTP.RES.CACHE_CONTROL.IS_PROXY_REVALIDATE) || (HTTP.RES.CACHE_CONTROL.IS_S_MAXAGE))" -action CACHE -storeInGroup DEFAULT
+add cache policy _uncacheableVaryRes -rule "((HTTP.RES.HEADER(\"Vary\").EXISTS) && ((HTTP.RES.HEADER(\"Vary\").INSTANCE(1).LENGTH > 0) || (!HTTP.RES.HEADER(\"Vary\").STRIP_END_WS.SET_TEXT_MODE(IGNORECASE).eq(\"Accept-Encoding\"))))" -action NOCACHE
+add cache policy _uncacheablePragmaRes -rule "HTTP.RES.HEADER(\"Pragma\").EXISTS" -action NOCACHE
+add cache policy _cacheableExpiryRes -rule "HTTP.RES.HEADER(\"Expires\").EXISTS" -action CACHE -storeInGroup DEFAULT
+add cache policy _imageRes -rule "HTTP.RES.HEADER(\"Content-Type\").SET_TEXT_MODE(IGNORECASE).STARTSWITH(\"image/\")" -action CACHE -storeInGroup DEFAULT
+add cache policy _personalizedRes -rule "HTTP.RES.HEADER(\"Set-Cookie\").EXISTS || HTTP.RES.HEADER(\"Set-Cookie2\").EXISTS" -action NOCACHE
+add cache policy ctx_images -rule "HTTP.REQ.URL.SET_TEXT_MODE(IGNORECASE).CONTAINS_INDEX(\"ctx_file_extensions\").BETWEEN(101,150)" -action CACHE -storeInGroup ctx_cg_poc
+add cache policy ctx_web_css -rule "HTTP.REQ.URL.ENDSWITH(\".css\")" -action CACHE -storeInGroup ctx_cg_poc
+add cache policy ctx_doc_pdf -rule "HTTP.REQ.URL.ENDSWITH(\".pdf\")" -action CACHE -storeInGroup ctx_cg_poc
+add cache policy ctx_web_JavaScript -rule "HTTP.REQ.URL.ENDSWITH(\".js\")" -action CACHE -storeInGroup ctx_cg_poc
+add cache policy ctx_web_JavaScript-Res -rule "HTTP.RES.HEADER(\"Content-Type\").CONTAINS(\"application/x-javascript\")" -action CACHE -storeInGroup ctx_cg_poc
+add cache policy ctx_NOCACHE_Cleanup -rule TRUE -action NOCACHE
+add cache policylabel _reqBuiltinDefaults -evaluates REQ
+add cache policylabel _resBuiltinDefaults -evaluates RES
+bind cache policylabel _reqBuiltinDefaults -policyName _nonGetReq -priority 100 -gotoPriorityExpression END
+bind cache policylabel _reqBuiltinDefaults -policyName _advancedConditionalReq -priority 200 -gotoPriorityExpression END
+bind cache policylabel _reqBuiltinDefaults -policyName _personalizedReq -priority 300 -gotoPriorityExpression END
+bind cache policylabel _resBuiltinDefaults -policyName _uncacheableStatusRes -priority 100 -gotoPriorityExpression END
+bind cache policylabel _resBuiltinDefaults -policyName _uncacheableVaryRes -priority 200 -gotoPriorityExpression END
+bind cache policylabel _resBuiltinDefaults -policyName _uncacheableCacheControlRes -priority 300 -gotoPriorityExpression END
+bind cache policylabel _resBuiltinDefaults -policyName _cacheableCacheControlRes -priority 400 -gotoPriorityExpression END
+bind cache policylabel _resBuiltinDefaults -policyName _uncacheablePragmaRes -priority 500 -gotoPriorityExpression END
+bind cache policylabel _resBuiltinDefaults -policyName _cacheableExpiryRes -priority 600 -gotoPriorityExpression END
+bind cache policylabel _resBuiltinDefaults -policyName _imageRes -priority 700 -gotoPriorityExpression END
+bind cache policylabel _resBuiltinDefaults -policyName _personalizedRes -priority 800 -gotoPriorityExpression END
+bind cache global NOPOLICY -priority 185883 -gotoPriorityExpression USE_INVOCATION_RESULT -type REQ_DEFAULT -invoke policylabel _reqBuiltinDefaults
+bind cache global NOPOLICY -priority 185883 -gotoPriorityExpression USE_INVOCATION_RESULT -type RES_DEFAULT -invoke policylabel _resBuiltinDefaults

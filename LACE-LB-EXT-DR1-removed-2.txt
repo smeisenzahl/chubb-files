@@ -1,0 +1,27 @@
+
+Changed node ip from 127.0.0.1 to 10.1.1.1, for the config to load
+    - this needs to be looked at by client
+
+
+The objects below had to be deleted because they flagged invalid even changing the . to _ would not work, client to verify if needed
+ltm pool /Common/2016officespace_ace_ina_vsvr {
+    members {
+        /Common/usclashpv2100c_sharepointa:443 {
+            address 10.12.73.175
+        }
+    }
+}
+
+ltm rule /Common/2016officespace_ace-ina_http_vsvr {
+when CLIENT_ACCEPTED {
+    set default_pool [LB::server pool]
+}
+when HTTP_REQUEST {
+    if { [HTTP::has_responded] } { return };
+    if { [active_members $default_pool] == 0 } {
+        HTTP::redirect "https://officespace.ace-ina.com"
+        return
+    }
+}
+}
+

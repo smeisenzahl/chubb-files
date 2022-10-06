@@ -1,0 +1,46 @@
+set appflow param -templateRefresh 3600 -httpUrl ENABLED -httpCookie ENABLED -httpReferer ENABLED -httpMethod ENABLED -httpHost ENABLED -httpUserAgent ENABLED -httpContentType ENABLED -httpXForwardedFor ENABLED -observationDomainName Default -SecurityInsightTraffic ENABLED -cacheInsight ENABLED -metrics ENABLED -events ENABLED -observationPointId 467667978 -logstreamOverNSIP ENABLED
+add appflow action af_action_global_Cata.aceprs.intr_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_global_Sldap.aceprs.intr_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_global_kerb.aceprs.intr_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_global_ldap.aceprs.intr_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_rtp_dns_tcp_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_rtp_dns_udp_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_rtp-gslbint-GCLDAP.aceins_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_rtp-gslbint-KLDAP.aceins_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_rtp-gslbint-LDAP.aceins_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_rtp-gslbint-SLDAP.aceins_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_rtp-gslbint-GCLDAP.acepartner_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_rtp-gslbint-KLDAP.acepartner_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_rtp-gslbint-LDAP.acepartner_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_rtp-gslbint-SLDAP.acepartner_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_rtp-gslb_cb_gcldap_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_rtp-gslb_cb_ldap_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_rtp-gslb_cb_sldap_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_adlds-rtp.chubb_ldap_test_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_adlds-rtp.chubb_sldap_vsvr_10.15.64.206 -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_10.15.64.206_web_sec -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow policy af_policy_act_web_sec_10.15.64.206 true af_action_10.15.64.206_web_sec
+
+bind lb vserver global_ldap.aceprs.intr_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 255
+bind lb vserver global_Sldap.aceprs.intr_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 254
+bind lb vserver global_kerb.aceprs.intr_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 255
+bind lb vserver global_Cata.aceprs.intr_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 255
+bind lb vserver rtp_dns_udp_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 255
+bind lb vserver rtp_dns_tcp_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 255
+bind lb vserver rtp-gslbint-LDAP.aceins_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 255
+bind lb vserver rtp-gslbint-SLDAP.aceins_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 255
+bind lb vserver rtp-gslbint-GCLDAP.aceins_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 255
+bind lb vserver rtp-gslbint-KLDAP.aceins_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 255
+bind lb vserver rtp-gslbint-LDAP.acepartner_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 255
+bind lb vserver rtp-gslbint-SLDAP.acepartner_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 255
+bind lb vserver rtp-gslbint-GCLDAP.acepartner_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 255
+bind lb vserver rtp-gslbint-KLDAP.acepartner_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 255
+bind lb vserver rtp-gslb_cb_ldap_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 255
+bind lb vserver rtp-gslb_cb_sldap_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 255
+bind lb vserver rtp-gslb_cb_gcldap_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 255
+bind lb vserver adlds-rtp.chubb_ldap_test_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 255
+bind lb vserver rtp-pingfed.acegroup_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 254
+bind lb vserver adlds-rtp.chubb_sldap_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 255
+bind lb vserver rtp-gslb_cb_kldap_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 255
+bind lb vserver rtp-vault.chubb_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 253
+

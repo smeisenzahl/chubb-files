@@ -1,0 +1,184 @@
+add appflow collector af_collector_10.15.64.206 -IPAddress 10.15.64.206 -port 4739
+add appflow collector af_collector_logstream_10.15.64.206 -IPAddress 10.15.64.206 -port 5557 -Transport logstream
+
+set appflow param -templateRefresh 3600 -httpUrl ENABLED -httpCookie ENABLED -httpReferer ENABLED -httpMethod ENABLED -httpHost ENABLED -httpUserAgent ENABLED -httpContentType ENABLED -httpXForwardedFor ENABLED -observationDomainName Default -SecurityInsightTraffic ENABLED -cacheInsight ENABLED -metrics ENABLED -events ENABLED -observationPointId 954207242 -logstreamOverNSIP ENABLED
+add appflow action af_action_10.15.64.206_web_sec -collectors af_collector_10.15.64.206 -securityInsight ENABLED
+add appflow action af_action_log_10.15.64.206_nop -collectors af_collector_logstream_10.15.64.206
+add appflow action af_action_log_10.15.64.206_web_sec -collectors af_collector_logstream_10.15.64.206 -securityInsight ENABLED
+add appflow policy af_policy_act_web_sec_10.15.64.206 true af_action_10.15.64.206_web_sec
+add appflow policy af_policy_act_log_10.15.64.206 true af_action_log_10.15.64.206_nop
+add appflow policy af_policy_act_log_web_sec_10.15.64.206 true af_action_log_10.15.64.206_web_sec
+
+bind lb vserver sf-xaa-rtp.chubb_new_vsvr -policyName af_policy_act_web_sec_10.15.64.206 -priority 255
+bind lb vserver sf-xaa-rtp.chubb_new_new_vsvr -policyName af_policy_act_log_web_sec_10.15.64.206 -priority 255
+
+bind vpn vserver masterpiece_poc_vsvr -policy LDAP_Karen -priority 100 -devno 67108865
+bind vpn vserver masterpiece_poc_vsvr -policy "Receiver for Web" -priority 100 -devno 167772161
+bind vpn vserver masterpiece_poc_vsvr -policy _cacheTCVPNStaticObjects -priority 10 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind vpn vserver masterpiece_poc_vsvr -policy _cacheOCVPNStaticObjects -priority 20 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind vpn vserver masterpiece_poc_vsvr -policy _cacheVPNStaticObjects -priority 30 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind vpn vserver masterpiece_poc_vsvr -policy _mayNoCacheReq -priority 40 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind vpn vserver masterpiece_poc_vsvr -policy _cacheWFStaticObjects -priority 10 -gotoPriorityExpression END -type RESPONSE -devno 486539264
+bind vpn vserver masterpiece_poc_vsvr -policy _noCacheRest -priority 20 -gotoPriorityExpression END -type RESPONSE -devno 486539264
+bind vpn vserver masterpiece_poc_callback_vsvr -policy _cacheTCVPNStaticObjects -priority 10 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind vpn vserver masterpiece_poc_callback_vsvr -policy _cacheOCVPNStaticObjects -priority 20 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind vpn vserver masterpiece_poc_callback_vsvr -policy _cacheVPNStaticObjects -priority 30 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind vpn vserver masterpiece_poc_callback_vsvr -policy _mayNoCacheReq -priority 40 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind vpn vserver masterpiece_poc_callback_vsvr -policy _cacheWFStaticObjects -priority 10 -gotoPriorityExpression END -type RESPONSE -devno 486539264
+bind vpn vserver masterpiece_poc_callback_vsvr -policy _noCacheRest -priority 20 -gotoPriorityExpression END -type RESPONSE -devno 486539264
+bind vpn vserver sf-xaa-rtp.chubb.com -policy NSldap_acepartner_rtp_pol -priority 90 -devno 67108865
+bind vpn vserver sf-xaa-rtp.chubb.com -policy NSldap_rtp_pol -priority 100 -devno 67108866
+bind vpn vserver sf-xaa-rtp.chubb.com -policy synVIP_ussbyapp8069.aceina_rad -priority 100 -devno 67108867
+bind vpn vserver sf-xaa-rtp.chubb.com -policy "Receiver for Web" -priority 100 -devno 167772161
+bind vpn vserver sf-xaa-rtp.chubb.com -policy NativeReceiver_sf_POL -priority 110 -devno 167772162
+bind vpn vserver sf-xaa-rtp.chubb.com -policy enforce_STS -priority 100 -gotoPriorityExpression END -type RESPONSE -devno 436207616
+bind vpn vserver sf-xaa-rtp.chubb.com -policy af_policy_act_log_10.15.64.206 -priority 254 -gotoPriorityExpression END -type REQUEST -devno 469762048
+bind vpn vserver sf-xaa-rtp.chubb.com -policy af_policy_act_log_10.15.64.206 -priority 254 -gotoPriorityExpression END -type ICA_REQUEST -devno 469762048
+bind vpn vserver sf-xaa-rtp.chubb.com -policy _cacheTCVPNStaticObjects -priority 10 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind vpn vserver sf-xaa-rtp.chubb.com -policy _cacheOCVPNStaticObjects -priority 20 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind vpn vserver sf-xaa-rtp.chubb.com -policy _cacheVPNStaticObjects -priority 30 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind vpn vserver sf-xaa-rtp.chubb.com -policy _mayNoCacheReq -priority 40 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind vpn vserver sf-xaa-rtp.chubb.com -policy _cacheWFStaticObjects -priority 10 -gotoPriorityExpression END -type RESPONSE -devno 486539264
+bind vpn vserver sf-xaa-rtp.chubb.com -policy _noCacheRest -priority 20 -gotoPriorityExpression END -type RESPONSE -devno 486539264
+bind vpn vserver bear3_jumppage_vsvr -policy NSldap_rtp_pol -priority 100 -devno 67108865
+bind vpn vserver bear3_jumppage_vsvr -policy NSldap_acepartner_rtp_pol -priority 110 -devno 67108866
+bind vpn vserver bear3_jumppage_vsvr -policy bush3_pol -priority 100 -devno 167772161
+bind vpn vserver bear3_jumppage_vsvr -policy enforce_STS -priority 100 -gotoPriorityExpression END -type REQUEST -devno 436207616
+bind vpn vserver bear3_jumppage_vsvr -policy _cacheTCVPNStaticObjects -priority 10 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind vpn vserver bear3_jumppage_vsvr -policy _cacheOCVPNStaticObjects -priority 20 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind vpn vserver bear3_jumppage_vsvr -policy _cacheVPNStaticObjects -priority 30 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind vpn vserver bear3_jumppage_vsvr -policy _mayNoCacheReq -priority 40 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind vpn vserver bear3_jumppage_vsvr -policy _cacheWFStaticObjects -priority 10 -gotoPriorityExpression END -type RESPONSE -devno 486539264
+bind vpn vserver bear3_jumppage_vsvr -policy _noCacheRest -priority 20 -gotoPriorityExpression END -type RESPONSE -devno 486539264
+bind vpn vserver sf2-us.chubb.com -policy NSldap_acepartner_rtp_pol -priority 100 -devno 67108865
+bind vpn vserver sf2-us.chubb.com -policy NSldap_rtp_pol -priority 110 -devno 67108866
+bind vpn vserver sf2-us.chubb.com -policy Receiver4Web -priority 100 -devno 167772161
+bind vpn vserver sf2-us.chubb.com -policy NativeReceiver4GenPact -priority 110 -devno 167772162
+bind vpn vserver sf2-us.chubb.com -policy af_policy_act_log_10.15.64.206 -priority 255 -gotoPriorityExpression END -type REQUEST -devno 469762048
+bind vpn vserver sf2-us.chubb.com -policy af_policy_act_log_10.15.64.206 -priority 255 -gotoPriorityExpression END -type ICA_REQUEST -devno 469762048
+bind vpn vserver sf2-us.chubb.com -policy _cacheTCVPNStaticObjects -priority 10 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind vpn vserver sf2-us.chubb.com -policy _cacheOCVPNStaticObjects -priority 20 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind vpn vserver sf2-us.chubb.com -policy _cacheVPNStaticObjects -priority 30 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind vpn vserver sf2-us.chubb.com -policy _mayNoCacheReq -priority 40 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind vpn vserver sf2-us.chubb.com -policy _cacheWFStaticObjects -priority 10 -gotoPriorityExpression END -type RESPONSE -devno 486539264
+bind vpn vserver sf2-us.chubb.com -policy _noCacheRest -priority 20 -gotoPriorityExpression END -type RESPONSE -devno 486539264
+bind authentication vserver saml_authn_vsvr -policy _cacheTCVPNStaticObjects -priority 10 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind authentication vserver saml_authn_vsvr -policy _cacheOCVPNStaticObjects -priority 20 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind authentication vserver saml_authn_vsvr -policy _cacheVPNStaticObjects -priority 30 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind authentication vserver saml_authn_vsvr -policy _mayNoCacheReq -priority 40 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind authentication vserver saml_authn_vsvr -policy _cacheWFStaticObjects -priority 10 -gotoPriorityExpression END -type RESPONSE -devno 486539264
+bind authentication vserver saml_authn_vsvr -policy _noCacheRest -priority 20 -gotoPriorityExpression END -type RESPONSE -devno 486539264
+bind authentication vserver sf-xaa-auth_vsvr -policy _cacheTCVPNStaticObjects -priority 10 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind authentication vserver sf-xaa-auth_vsvr -policy _cacheOCVPNStaticObjects -priority 20 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind authentication vserver sf-xaa-auth_vsvr -policy _cacheVPNStaticObjects -priority 30 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind authentication vserver sf-xaa-auth_vsvr -policy _mayNoCacheReq -priority 40 -gotoPriorityExpression END -type REQUEST -devno 486539264
+bind authentication vserver sf-xaa-auth_vsvr -policy _cacheWFStaticObjects -priority 10 -gotoPriorityExpression END -type RESPONSE -devno 486539264
+bind authentication vserver sf-xaa-auth_vsvr -policy _noCacheRest -priority 20 -gotoPriorityExpression END -type RESPONSE -devno 486539264
+bind authentication vserver sf-xaa-auth_vsvr -policy _sf-xaa-auth_vsvr_sf-xaa-dual_nFactor__root_0 -priority 100 -nextFactor sf-xaa-dual_nFactor__root -gotoPriorityExpression END -devno 536870912
+
+
+bind ssl serviceGroup cog_connection_svc_grp -eccCurveName P_256
+bind ssl serviceGroup cog_connection_svc_grp -eccCurveName P_384
+bind ssl serviceGroup cog_connection_svc_grp -eccCurveName P_224
+bind ssl serviceGroup cog_connection_svc_grp -eccCurveName P_521
+bind ssl serviceGroup SF-XAA-RTP_svc_grp -eccCurveName P_256
+bind ssl serviceGroup SF-XAA-RTP_svc_grp -eccCurveName P_384
+bind ssl serviceGroup SF-XAA-RTP_svc_grp -eccCurveName P_224
+bind ssl serviceGroup SF-XAA-RTP_svc_grp -eccCurveName P_521
+bind ssl service MasterPiece_SF_SSL_POC -eccCurveName P_256
+bind ssl service MasterPiece_SF_SSL_POC -eccCurveName P_384
+bind ssl service MasterPiece_SF_SSL_POC -eccCurveName P_224
+bind ssl service MasterPiece_SF_SSL_POC -eccCurveName P_521
+bind ssl service nshttps-10.12.20.4-443 -eccCurveName P_256
+bind ssl service nshttps-10.12.20.4-443 -eccCurveName P_384
+bind ssl service nshttps-10.12.20.4-443 -eccCurveName P_224
+bind ssl service nshttps-10.12.20.4-443 -eccCurveName P_521
+bind ssl service nsrpcs-10.12.20.4-3008 -eccCurveName P_256
+bind ssl service nsrpcs-10.12.20.4-3008 -eccCurveName P_384
+bind ssl service nsrpcs-10.12.20.4-3008 -eccCurveName P_224
+bind ssl service nsrpcs-10.12.20.4-3008 -eccCurveName P_521
+bind ssl service nshttps-10.12.16.5-443 -eccCurveName P_256
+bind ssl service nshttps-10.12.16.5-443 -eccCurveName P_384
+bind ssl service nshttps-10.12.16.5-443 -eccCurveName P_224
+bind ssl service nshttps-10.12.16.5-443 -eccCurveName P_521
+bind ssl service nsrpcs-10.12.16.5-3008 -eccCurveName P_256
+bind ssl service nsrpcs-10.12.16.5-3008 -eccCurveName P_384
+bind ssl service nsrpcs-10.12.16.5-3008 -eccCurveName P_224
+bind ssl service nsrpcs-10.12.16.5-3008 -eccCurveName P_521
+bind ssl service nsrnatsip-127.0.0.1-5061 -eccCurveName P_256
+bind ssl service nsrnatsip-127.0.0.1-5061 -eccCurveName P_384
+bind ssl service nsrnatsip-127.0.0.1-5061 -eccCurveName P_224
+bind ssl service nsrnatsip-127.0.0.1-5061 -eccCurveName P_521
+bind ssl service nskrpcs-127.0.0.1-3009 -eccCurveName P_256
+bind ssl service nskrpcs-127.0.0.1-3009 -eccCurveName P_384
+bind ssl service nskrpcs-127.0.0.1-3009 -eccCurveName P_224
+bind ssl service nskrpcs-127.0.0.1-3009 -eccCurveName P_521
+bind ssl service nshttps-::1l-443 -eccCurveName P_256
+bind ssl service nshttps-::1l-443 -eccCurveName P_384
+bind ssl service nshttps-::1l-443 -eccCurveName P_224
+bind ssl service nshttps-::1l-443 -eccCurveName P_521
+bind ssl service nsrpcs-::1l-3008 -eccCurveName P_256
+bind ssl service nsrpcs-::1l-3008 -eccCurveName P_384
+bind ssl service nsrpcs-::1l-3008 -eccCurveName P_224
+bind ssl service nsrpcs-::1l-3008 -eccCurveName P_521
+bind ssl service nshttps-127.0.0.1-443 -eccCurveName P_256
+bind ssl service nshttps-127.0.0.1-443 -eccCurveName P_384
+bind ssl service nshttps-127.0.0.1-443 -eccCurveName P_224
+bind ssl service nshttps-127.0.0.1-443 -eccCurveName P_521
+bind ssl service nsrpcs-127.0.0.1-3008 -eccCurveName P_256
+bind ssl service nsrpcs-127.0.0.1-3008 -eccCurveName P_384
+bind ssl service nsrpcs-127.0.0.1-3008 -eccCurveName P_224
+bind ssl service nsrpcs-127.0.0.1-3008 -eccCurveName P_521
+bind ssl vserver connect-2-masterpiece_vsvr -eccCurveName P_256
+bind ssl vserver connect-2-masterpiece_vsvr -eccCurveName P_384
+bind ssl vserver connect-2-masterpiece_vsvr -eccCurveName P_224
+bind ssl vserver connect-2-masterpiece_vsvr -eccCurveName P_521
+bind ssl vserver sf-xaa-rtp.chubb_new_vsvr -eccCurveName P_256
+bind ssl vserver sf-xaa-rtp.chubb_new_vsvr -eccCurveName P_384
+bind ssl vserver sf-xaa-rtp.chubb_new_vsvr -eccCurveName P_224
+bind ssl vserver sf-xaa-rtp.chubb_new_vsvr -eccCurveName P_521
+bind ssl vserver sf-xaa-rtp.chubb_new_new_vsvr -eccCurveName P_256
+bind ssl vserver sf-xaa-rtp.chubb_new_new_vsvr -eccCurveName P_384
+bind ssl vserver sf-xaa-rtp.chubb_new_new_vsvr -eccCurveName P_224
+bind ssl vserver sf-xaa-rtp.chubb_new_new_vsvr -eccCurveName P_521
+bind ssl vserver con_connection_vsvr -eccCurveName P_256
+bind ssl vserver con_connection_vsvr -eccCurveName P_384
+bind ssl vserver con_connection_vsvr -eccCurveName P_224
+bind ssl vserver con_connection_vsvr -eccCurveName P_521
+bind ssl vserver saml_authn_vsvr -eccCurveName P_256
+bind ssl vserver saml_authn_vsvr -eccCurveName P_384
+bind ssl vserver saml_authn_vsvr -eccCurveName P_224
+bind ssl vserver saml_authn_vsvr -eccCurveName P_521
+bind ssl vserver sf-xaa-auth_vsvr -eccCurveName P_256
+bind ssl vserver sf-xaa-auth_vsvr -eccCurveName P_384
+bind ssl vserver sf-xaa-auth_vsvr -eccCurveName P_224
+bind ssl vserver sf-xaa-auth_vsvr -eccCurveName P_521
+bind ssl vserver masterpiece_poc_vsvr -eccCurveName P_256
+bind ssl vserver masterpiece_poc_vsvr -eccCurveName P_384
+bind ssl vserver masterpiece_poc_vsvr -eccCurveName P_224
+bind ssl vserver masterpiece_poc_vsvr -eccCurveName P_521
+bind ssl vserver masterpiece_poc_callback_vsvr -eccCurveName P_256
+bind ssl vserver masterpiece_poc_callback_vsvr -eccCurveName P_384
+bind ssl vserver masterpiece_poc_callback_vsvr -eccCurveName P_224
+bind ssl vserver masterpiece_poc_callback_vsvr -eccCurveName P_521
+bind ssl vserver sf-xaa-rtp.chubb.com -eccCurveName P_256
+bind ssl vserver sf-xaa-rtp.chubb.com -eccCurveName P_384
+bind ssl vserver sf-xaa-rtp.chubb.com -eccCurveName P_224
+bind ssl vserver sf-xaa-rtp.chubb.com -eccCurveName P_521
+bind ssl vserver bear3_jumppage_vsvr -eccCurveName P_256
+bind ssl vserver bear3_jumppage_vsvr -eccCurveName P_384
+bind ssl vserver bear3_jumppage_vsvr -eccCurveName P_224
+bind ssl vserver bear3_jumppage_vsvr -eccCurveName P_521
+bind ssl vserver sf2-us.chubb.com -eccCurveName P_256
+bind ssl vserver sf2-us.chubb.com -eccCurveName P_384
+bind ssl vserver sf2-us.chubb.com -eccCurveName P_224
+bind ssl vserver sf2-us.chubb.com -eccCurveName P_521
+
+add appfw JSONContentType "^application/json$" -isRegex REGEX -devno 16772
+add appfw urlEncodedFormContentType "application/x-www-form-urlencoded" -devno 16773
+add appfw urlEncodedFormContentType "application/x-www-form-urlencoded.*" -isRegex REGEX -devno 16774
+add appfw multipartFormContentType "multipart/form-data" -devno 16775
+add appfw multipartFormContentType "multipart/form-data.*" -isRegex REGEX -devno 16776
+add appfw XMLContentType ".*/xml" -isRegex REGEX -devno 16777
+add appfw XMLContentType ".*/.*\\+xml" -isRegex REGEX -devno 16778
+add appfw XMLContentType ".*/xml-.*" -isRegex REGEX -devno 16779

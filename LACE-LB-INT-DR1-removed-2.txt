@@ -1,0 +1,108 @@
+ltm pool /Common/2016acementoring.aceins_vsvr {
+    members {
+        /Common/usclashpv2100c_sharepointb:80 {
+            address 10.12.73.176
+        }
+    }
+}
+ltm pool /Common/2016acers.search.aceins_vsvr {
+    members {
+        /Common/usclashpv2100c_sharepointc:80 {
+            address 10.12.73.173
+        }
+    }
+}
+ltm pool /Common/2016daxsp.aceins_vsvr {
+    members {
+        /Common/usclashpv2014a_daxsp:80 {
+            address 10.12.72.202
+        }
+    }
+}
+ltm pool /Common/2016emeacoachingsite.aceins_vsvr {
+    members {
+        /Common/usclashpv2100c_sharepointb:80 {
+            address 10.12.73.176
+        }
+    }
+}
+ltm pool /Common/2016emeamentoring.aceins_vsvr {
+    members {
+        /Common/usclashpv2100c_sharepointb:80 {
+            address 10.12.73.176
+        }
+    }
+}
+ltm pool /Common/2016giwss.acegroup_vsvr {
+    members {
+        /Common/usclashpv2100c_sharepointc:80 {
+            address 10.12.73.173
+        }
+    }
+}
+ltm pool /Common/2016mossprod02.ace-ina_vsvr {
+    members {
+        /Common/usclashpv2100c_sharepointb:80 {
+            address 10.12.73.176
+        }
+    }
+}
+ltm pool /Common/2016msbi.acegroup_vsvr {
+    members {
+        /Common/usclashpv2100c_sharepointc:80 {
+            address 10.12.73.173
+        }
+    }
+}
+ltm pool /Common/2016officespace.ace-ina_vsvr {
+    members {
+        /Common/usclashpv2100c_sharepointa:443 {
+            address 10.12.73.175
+        }
+    }
+}
+ltm pool /Common/2016openspace.ace-ina_vsvr {
+    members {
+        /Common/usclashpv2100c_sharepointb:80 {
+            address 10.12.73.176
+        }
+    }
+}
+ltm pool /Common/2016search.aceins_vsvr {
+    members {
+        /Common/usclashpv2100c_sharepointc:80 {
+            address 10.12.73.173
+        }
+    }
+}
+ltm pool /Common/2016workspace.ace-ina_vsvr {
+    members {
+        /Common/usclashpv2100c_sharepointc:80 {
+            address 10.12.73.173
+        }
+    }
+}
+ltm rule /Common/2016brandcenter.acegroup_http_vsvr {
+when CLIENT_ACCEPTED {
+    set default_pool [LB::server pool]
+}
+when HTTP_REQUEST {
+    if { [HTTP::has_responded] } { return };
+    if { [active_members $default_pool] == 0 } {
+        HTTP::redirect "https://brandcenter.acegroup.com"
+        return
+    }
+}
+}
+ltm rule /Common/2016officespace.ace-ina_http_vsvr {
+when CLIENT_ACCEPTED {
+    set default_pool [LB::server pool]
+}
+when HTTP_REQUEST {
+    if { [HTTP::has_responded] } { return };
+    if { [active_members $default_pool] == 0 } {
+        HTTP::redirect "https://officespace.ace-ina.com"
+        return
+    }
+}
+}
